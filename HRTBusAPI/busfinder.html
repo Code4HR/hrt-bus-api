@@ -52,16 +52,17 @@
 
                 var contentString = '';
                 contentString += 'Bus #' + this.id + ' traveling ';
-                contentString += this.direction == 1 ? 'Outbound is ' : 'Inbound is ';
-
+                contentString += this.direction == 1 ? 'Outbound' : 'Inbound';
+                contentString += '<br>is ';
+                
                 if (this.adherence == 0) contentString += 'On Time.';
-                else if (this.adherence > 0) contentString += this.adherence + ' minutes Early.';
+                else if (this.adherence > 0) contentString += this.adherence + ' minutes Early';
                 else contentString += (this.adherence * -1) + ' minutes Late.';
 
                 var date = new Date(parseInt(this.datetime.substr(6)));
                 var timePassed = new Date(new Date().getTime() - date);
 
-                contentString += '<br>As of ' + timePassed.getMinutes() + ' minutes ago.';
+                contentString += '<br>as of ' + timePassed.getMinutes() + ' minutes ago.';
 
                 var infowindow = new google.maps.InfoWindow({
                     content: contentString
