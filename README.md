@@ -3,6 +3,11 @@ hrt-bus-api
 
 C# ASP.NET application that processes and exposes HRT Bus Data through an API
 
+### Examples
+
+- <http://hrtbusapi.apphb.com/API/route>
+- <http://hrtbusapi.apphb.com/refresh>
+
 ## Problem
 
 HRT exposes the real time location of there buses [here](ftp://216.54.15.3/Anrd/hrtrtf.txt). Unfortunately, this file gives us less than five minutes of data and most of the entries don't have a route number associated with them. Riders lookup bus information by route number, so without it, the data isn't very useful.
@@ -13,7 +18,7 @@ This application periodically pulls[*](#Polling_Hack) the HRT data and caches it
 
 ## Hosting
 
-The application is currently hosted by [Ben's](https://github.com/bschoenfeld) AppHarbor account at [http://hrtbusapi.apphb.com](http://hrtbusapi.apphb.com).
+The application is currently hosted by [Ben's](https://github.com/bschoenfeld) AppHarbor account at <http://hrtbusapi.apphb.com>.
 
 ## API
 
