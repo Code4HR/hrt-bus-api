@@ -1,0 +1,110 @@
+﻿<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript">
+
+        /********************
+        * Do Work
+        *******************/
+        var map;
+        function showMap(position) {
+            var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            var myOptions = {
+                zoom: 11,
+                center: latlng,
+                mapTypeControl: false,
+                navigationControlOptions: { style: google.maps.NavigationControlStyle.SMALL },
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var mapcanvas = $('#mapcanvas');
+            map = new google.maps.Map(mapcanvas[0], myOptions);
+            var marker = new google.maps.Marker({
+                position: latlng,
+                map: map,
+                title: "I am here!"
+            });
+        }
+
+        function loadBusesIntoMap(buses) {
+            console.log(buses);
+
+            $.each(buses, function () {
+                var latlng = new google.maps.LatLng(this.lat, this.lon);
+                var marker = new google.maps.Marker({
+                    position: latlng,
+                    map: map,
+                    animation: google.maps.Animation.DROP,
+                    title: 'Bus ' + this.id + ' is ' + this.adherence + ' min late',
+                    icon: '/img/bus.png'
+                });
+
+                var contentString = '';
+                contentString += 'Bus #' + this.id + ' traveling ';
+                contentString += this.direction == 1 ? 'Outbound is ' : 'Inbound is ';
+
+                if (this.adherence == 0) contentString += 'On Time.';
+                else if (this.adherence > 0) contentString += this.adherence + ' minutes Early.';
+                else contentString += (this.adherence * -1) + ' minutes Late.';
+
+                var date = new Date(parseInt(this.datetime.substr(6)));
+                var timePassed = new Date(new Date().getTime() - date);
+
+                contentString += '<br>As of ' + timePassed.getMinutes() + ' minutes ago.';
+
+                var infowindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+                google.maps.event.addListener(marker, 'click', function () {
+                    infowindow.open(map, marker);
+                });
+            });
+        }
+
+        function showBuses() {
+            var routeNumber = $("#routeNumber").val();
+            $.get("/api/route/" + routeNumber)
+                .done(function (result) {
+                    loadBusesIntoMap(result.buses);
+                });
+        }
+
+        function error(msg) {
+            var errMsg = typeof msg == 'string' ? msg : "Geolocation failed";
+            $('#msg').html(errMsg);
+        }
+
+        $(document).ready(function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showMap, error);
+            } else {
+                error('Geolocation not supported');
+            }
+
+            $.get("/api/list/routes")
+                .done(function (result) {
+                    console.log(result);
+                    var options = $("#routeNumber");
+                    $.each(result, function() {
+                        options.append($("<option />").val(this).text(this));
+                    });
+                });
+        });
+    </script>
+</head>
+<body>
+    <div data-role="header">
+        <h3>HRT Buses</h3>
+    </div>
+    <div data-role="content">
+        <select id="routeNumber" onchange="showBuses()">
+            <option selected="selected" value="">Select Route</option>
+        </select>
+    </div>
+    <div id="msg"></div>
+    <div id="mapcanvas" style="height: 400px; width: 100%;"></div>
+</body>
+</html>

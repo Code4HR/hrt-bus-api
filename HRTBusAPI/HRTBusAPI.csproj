@@ -58,6 +58,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="busfinder.html" />
+    <Content Include="img\bus.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -71,6 +73,7 @@
     <Compile Include="API\RouteModel.cs" />
     <Compile Include="BusCheckin.cs" />
     <Compile Include="BusDataModule.cs" />
+    <Compile Include="CustomBoostrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

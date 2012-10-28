@@ -13,6 +13,8 @@ namespace HRTBusAPI
 
         public BusDataModule()
         {
+            Get["/example/ui"] = parameters => View["busfinder.html", null];
+
             Get["/refresh"] = RefreshBusData;
 
             Get["/api/raw"] = parameters => Checkins.Select(c => c.ToString()).Aggregate((s1, s2) => s1 + "<br>" + s2);
