@@ -17,6 +17,15 @@ namespace HRTBusAPI
 
             Get["/api/raw"] = parameters => Checkins.Select(c => c.ToString()).Aggregate((s1, s2) => s1 + "<br>" + s2);
 
+            Get["/api/list/routes"] =
+                parameters =>
+                    {
+                        var routes = Checkins.Where(c => c.HasRoute).Select(c => c.Route);
+                        var result = routes.Distinct().ToList();
+                        result.Sort();
+                        return Response.AsJson(result);
+                    };
+
             Get["/api/route"] =
                 parameters =>
                     {
