@@ -30,7 +30,7 @@ Returns an array of all known routes
 [1,2,3]
 ```
 
-### /API/route/<routeNumber>
+### /API/route/{routeNumber}
 
 Returns an object with the route number and an array of the most recent checkin for each bus on the route. Route Number 0 returns all buses without a route.
 ```javascript
@@ -63,7 +63,7 @@ buses?route=true
 buses?route=false
 ```
 
-### /API/bus/<busId>
+### /API/bus/{busId}
 
 Returns an array of all the checkins the bus has made in the last hour
 
