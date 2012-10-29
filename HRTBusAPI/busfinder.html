@@ -11,7 +11,8 @@
         * Do Work
         *******************/
         var map;
-        var markersArray = [];
+        var busMarkers = [];
+        var busPaths = [];
         
         function showMap(position) {
             var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -32,9 +33,15 @@
         }
 
         function clearOverlays() {
-            for (var i = 0; i < markersArray.length; i++) {
-                markersArray[i].setMap(null);
+            for (var i = 0; i < busMarkers.length; i++) {
+                busMarkers[i].setMap(null);
             }
+            busMarkers.length = 0;
+            
+            for (var i = 0; i < busPaths.length; i++) {
+                busPaths[i].setMap(null);
+            }
+            busPaths.length = 0;
         }
 
         function loadBusesIntoMap(buses) {
@@ -54,7 +61,7 @@
                 contentString += 'Bus #' + this.id + ' traveling ';
                 contentString += this.direction == 1 ? 'Outbound' : 'Inbound';
                 contentString += '<br>is ';
-                
+
                 if (this.adherence == 0) contentString += 'On Time.';
                 else if (this.adherence > 0) contentString += this.adherence + ' minutes Early';
                 else contentString += (this.adherence * -1) + ' minutes Late.';
@@ -67,10 +74,28 @@
                 var infowindow = new google.maps.InfoWindow({
                     content: contentString
                 });
-                markersArray.push(marker);
+                busMarkers.push(marker);
                 google.maps.event.addListener(marker, 'click', function () {
                     infowindow.open(map, marker);
                 });
+
+                $.get("/api/bus/" + this.id)
+                    .done(function (checkins) {
+                        var pathCoordinates = [];
+                        $.each(checkins, function () {
+                            pathCoordinates.push(new google.maps.LatLng(this.lat, this.lon));
+                        });
+
+                        var busPath = new google.maps.Polyline({
+                            path: pathCoordinates,
+                            strokeColor: "#FF0000",
+                            strokeOpacity: 1.0,
+                            strokeWeight: 2
+                        });
+
+                        busPaths.push(busPath);
+                        busPath.setMap(map);
+                    });
             });
         }
 
