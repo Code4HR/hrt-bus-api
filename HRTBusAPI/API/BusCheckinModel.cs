@@ -6,6 +6,7 @@ namespace HRTBusAPI.API
     {
         public int id { get; set; }
         public int route { get; set; }
+        public int stop { get; set; }
         public int direction { get; set; }
         public DateTime datetime { get; set; }
         public double lat { get; set; }
@@ -16,6 +17,7 @@ namespace HRTBusAPI.API
         {
             id = checkin.BusId;
             route = checkin.Route;
+            stop = checkin.StopId;
             direction = checkin.Direction;
             datetime = checkin.CheckinTime;
             lat = checkin.Lat;
