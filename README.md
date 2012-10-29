@@ -6,7 +6,6 @@ C# ASP.NET application that processes and exposes HRT Bus Data through an API
 ### Examples
 
 - <http://hrtbusapi.apphb.com/example/ui>
-- <http://hrtbusapi.apphb.com/API/route>
 - <http://hrtbusapi.apphb.com/refresh>
 
 ## Problem
