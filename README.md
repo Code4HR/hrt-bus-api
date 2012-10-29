@@ -23,9 +23,33 @@ The application is currently hosted by [Ben's](https://github.com/bschoenfeld) A
 
 ## API
 
-- `/API/route`
+- `/API/routes`
+Returns an array of all known routes
+`[1,2,3]`
 - `/API/route/{routeNumber}`
+Returns an object with the route number and an array of the most recent checkin for each bus on the route.
+`{
+buses: [
+{
+id: 1219,
+route: 2,
+direction: 1,
+datetime: "/Date(1351502600000)/",
+lat: 37.0128547,
+lon: -76.3649448,
+adherence: 0
+}
+],
+route: 2
+}`
+- `/API/buses`
+Returns an array of all known buses
+`[1001,2002,3003]`
+Add the route parameter and specify true or false to get only buses with or without a route
+`buses?route=true`
+`buses?route=false`
 - `/API/bus/{busId}`
+Returns an array of all the checkins the bus has made in the last hour
 
 ## * Polling Hack
 

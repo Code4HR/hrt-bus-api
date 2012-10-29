@@ -47,13 +47,15 @@
         function loadBusesIntoMap(buses) {
             console.log(buses);
 
+            $('#msg').text(buses.length + ' buses found');
+
             $.each(buses, function () {
                 var latlng = new google.maps.LatLng(this.lat, this.lon);
                 var marker = new google.maps.Marker({
                     position: latlng,
                     map: map,
                     animation: google.maps.Animation.DROP,
-                    title: 'Bus ' + this.id + ' is ' + this.adherence + ' min late',
+                    title: 'Bus ' + this.id,
                     icon: '/img/bus.png'
                 });
 
@@ -101,6 +103,7 @@
 
         function showBuses() {
             clearOverlays();
+            $('#msg').val('');
             var routeNumber = $("#routeNumber").val();
             $.get("/api/route/" + routeNumber)
                 .done(function (result) {
@@ -120,13 +123,14 @@
                 error('Geolocation not supported');
             }
 
-            $.get("/api/list/routes")
+            $.get("/api/routes")
                 .done(function (result) {
                     console.log(result);
                     var options = $("#routeNumber");
                     $.each(result, function() {
                         options.append($("<option />").val(this).text(this));
                     });
+                    options.append($("<option />").val(0).text("No Route"));
                 });
         });
     </script>

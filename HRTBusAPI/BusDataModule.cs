@@ -17,9 +17,7 @@ namespace HRTBusAPI
 
             Get["/refresh"] = RefreshBusData;
 
-            Get["/api/raw"] = parameters => Checkins.Select(c => c.ToString()).Aggregate((s1, s2) => s1 + "<br>" + s2);
-
-            Get["/api/list/routes"] =
+            Get["/api/routes"] =
                 parameters =>
                     {
                         var routes = Checkins.Where(c => c.HasRoute).Select(c => c.Route);
@@ -28,26 +26,18 @@ namespace HRTBusAPI
                         return Response.AsJson(result);
                     };
 
-            Get["/api/route"] =
+            Get["/api/buses"] =
                 parameters =>
                     {
-                        var result = new List<RouteModel>();
-                        foreach (var checkin in Checkins.Where(checkin => checkin.HasRoute))
-                        {
-                            // Add the route if it doesn't exist
-                            if (!result.Exists(r => r.route == checkin.Route))
-                                result.Add(new RouteModel { route = checkin.Route });
+                        var checkins = Checkins;
+                        if (Request.Query.route)
+                            checkins = Checkins.Where(c => c.HasRoute).ToList();
+                        if (Request.Query.route != null && !Request.Query.route)
+                            checkins = Checkins.Where(c => c.HasRoute).ToList();
 
-                            // Get the route from the list
-                            var route = result.First(r => r.route == checkin.Route);
-
-                            // Don't add the checkin if there is already a newer one for this bus
-                            if (route.buses.Exists(b => b.id == checkin.BusId)) continue;
-
-                            route.buses.Add(new BusCheckinModel(checkin));
-                            route.buses.Sort((x, y) => x.id.CompareTo(y.id));
-                        }
-                        result.Sort((x, y) => x.route.CompareTo(y.route));
+                        var busIds = checkins.Select(c => c.BusId);
+                        var result = busIds.Distinct().ToList();
+                        result.Sort();
                         return Response.AsJson(result);
                     };
 
@@ -55,6 +45,9 @@ namespace HRTBusAPI
                 parameters =>
                     {
                         var checkins = Checkins.FindAll(c => c.Route == parameters.route);
+                        if ((int)parameters.route == 0)
+                            checkins = Checkins.FindAll(c => c.HasRoute == false);
+
                         var result = new RouteModel { route = parameters.route };
                         foreach (var checkin in checkins.Where(checkin => !result.buses.Exists(b=>b.id == checkin.BusId)))
                         {
