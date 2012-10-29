@@ -15,11 +15,11 @@ HRT exposes the real time location of there buses [here](ftp://216.54.15.3/Anrd/
 
 ## Solution
 
-This application periodically pulls[*](#Polling_Hack) the HRT data and caches it for an hour. Each data set from HRT typically contains 20% of the necessary route information. The application's cache is able to build route information to more than 80%. The application exposes the cached data through a RESTful API.
+This application periodically pulls[*](#Polling_Hack) the HRT data and caches it for an hour. Each data set from HRT typically contains 10% of the necessary route information. The application's cache is able to build route information to more than 80%. The application exposes the cached data through a RESTful API.
 
 ## Hosting
 
-The application is currently hosted by [Ben's](https://github.com/bschoenfeld) AppHarbor account at <http://hrtbusapi.apphb.com>.
+The application is currently hosted by [Ben's](https://github.com/bschoenfeld) AppHarbor account at <http://hrtbusapi.apphb.com>. Any push to this repository (including those that don't touch code) will trigger AppHarbor to rebuild and deploy the app, which will clear the cache. The app needs 5-10 minutes to rebuild the cache to the point where it has enough route information to be useful.
 
 ## API
 
