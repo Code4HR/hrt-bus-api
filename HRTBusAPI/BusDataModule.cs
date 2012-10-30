@@ -106,13 +106,13 @@ namespace HRTBusAPI
                 var percentWithRoute = Checkins.FindAll(c => c.HasRoute).Count*100.0/Checkins.Count;
 
                 return string.Format("{0} checkins in FTP file.<br>" +
-                                     "{1} were duplicates.<br>" +
+                                     "{1} were new.<br>" +
                                      "{2} new checkins didn't have a route. Routes were found for {3} of those.<br>" +
                                      "{4} were removed because they were more than an hour old.<br>" +
                                      "{5} checkins now in memory.<br>" +
                                      "{6}% have a route.",
                     newCheckins.Count,
-                    duplicates,
+                    newCheckins.Count - duplicates,
                     withoutRoute,
                     routeLookedup,
                     removed,
