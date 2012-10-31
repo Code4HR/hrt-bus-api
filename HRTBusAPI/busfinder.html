@@ -65,7 +65,7 @@
 
             this.getCheckinHistory = function(callback) {
                 $.get("/api/bus/" + this.checkin.id)
-                    .done(callback);
+                    .done($.proxy(callback, this));
             };
 
             this.getInfoWindowMsg = function() {
@@ -91,9 +91,12 @@
                 return msg;
             };
 
-            this.destroy = function() {
-                this.marker.setMap(null);
-                this.path.setMap(null);
+            this.destroy = function () {
+                if(this.marker)
+                    this.marker.setMap(null);
+                
+                if(this.path)
+                    this.path.setMap(null);
             };
         };
         
