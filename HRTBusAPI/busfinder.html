@@ -10,8 +10,7 @@
         var map;
         var userPosition;
         var busesOnMap = [];
-        var visiblePath;
-        var visibleInfoWindow;
+        var visibleBus;
 
         function BusModel(checkin) {
             this.checkin = checkin;
@@ -42,12 +41,21 @@
                 google.maps.event.addListener(this.infoWindow, 'closeclick', this.markerUnselected);
             };
 
-            this.createPath = function(pastCheckins) {
+            this.createPath = function (pastCheckins) {
+                var stopMarkers = [];
                 var pathCoordinates = [];
-                $.each(pastCheckins, function() {
-                    pathCoordinates.push(new google.maps.LatLng(this.lat, this.lon));
+                $.each(pastCheckins, function () {
+                    var position = new google.maps.LatLng(this.lat, this.lon);
+                    pathCoordinates.push(position);
+
+                    if (this.stop != -1)
+                        stopMarkers.push(new google.maps.Marker({
+                            position: position,
+                            icon: { path: google.maps.SymbolPath.CIRCLE, scale: 2 }
+                        }));
                 });
 
+                this.stopMarkers = stopMarkers;
                 this.path = new google.maps.Polyline({
                     path: pathCoordinates,
                     strokeColor: "#FF0000",
@@ -59,17 +67,16 @@
             this.markerSelected = function (context) {
                 map.setCenter(context.position);
 
-                if (context.infoWindow) {
-                    if (visibleInfoWindow) visibleInfoWindow.close();
-                    visibleInfoWindow = context.infoWindow;
-                    visibleInfoWindow.open(map, context.marker);
+                if (visibleBus) {
+                    visibleBus.infoWindow.close();
+                    visibleBus.path.setMap(null);
+                    $.each(visibleBus.stopMarkers, function () { this.setMap(null); });
                 }
 
-                if (context.path) {
-                    if (visiblePath) visiblePath.setMap(null);
-                    visiblePath = context.path;
-                    visiblePath.setMap(map);
-                }
+                visibleBus = context;
+                if (visibleBus.infoWindow) visibleBus.infoWindow.open(map, context.marker);
+                if (visibleBus.path) visibleBus.path.setMap(map);
+                if (visibleBus.stopMarkers) $.each(visibleBus.stopMarkers, function () { this.setMap(map); });
             };
 
             this.markerUnselected = function() {
