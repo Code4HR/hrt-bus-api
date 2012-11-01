@@ -8,18 +8,20 @@
     <script type="text/javascript">
 
         var map;
+        var userPosition;
         var busesOnMap = [];
 
         function BusModel(checkin) {
             this.checkin = checkin;
 
-            this.addToMap = function() {
-                this.createMarker();
+            this.addToMap = function () {
+                var position = this.createMarker();
                 this.createInfoWindow();
                 this.getCheckinHistory(this.createPath);
+                return position;
             };
 
-            this.createMarker = function() {
+            this.createMarker = function () {
                 var position = new google.maps.LatLng(this.checkin.lat, this.checkin.lon);
                 this.marker = new google.maps.Marker({
                     position: position,
@@ -28,6 +30,7 @@
                     title: 'Bus ' + this.checkin.id,
                     icon: '/img/bus.png'
                 });
+                return position;
             };
 
             this.createInfoWindow = function () {
@@ -101,10 +104,10 @@
         };
         
         function showMap(position) {
-            var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             var myOptions = {
                 zoom: 11,
-                center: latlng,
+                center: userPosition,
                 mapTypeControl: false,
                 navigationControlOptions: { style: google.maps.NavigationControlStyle.SMALL },
                 mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -112,7 +115,7 @@
             var mapcanvas = $('#mapcanvas');
             map = new google.maps.Map(mapcanvas[0], myOptions);
             var marker = new google.maps.Marker({
-                position: latlng,
+                position: userPosition,
                 map: map,
                 title: "I am here!"
             });
@@ -126,11 +129,15 @@
         function loadBusesIntoMap(buses) {
             $('#msg').text(buses.length + ' buses found');
 
+            var bounds = new google.maps.LatLngBounds();
+            bounds.extend(userPosition);
             $.each(buses, function () {
                 var bus = new BusModel(this);
-                bus.addToMap();
+                var position = bus.addToMap();
+                bounds.extend(position);
                 busesOnMap.push(bus);
             });
+            map.fitBounds(bounds);
         }
 
         function showBuses() {
