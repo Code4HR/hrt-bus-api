@@ -10,36 +10,36 @@
         var map;
         var userPosition;
         var busesOnMap = [];
+        var visiblePath;
+        var visibleInfoWindow;
 
         function BusModel(checkin) {
             this.checkin = checkin;
 
             this.addToMap = function () {
-                var position = this.createMarker();
+                this.createMarker();
                 this.createInfoWindow();
                 this.getCheckinHistory(this.createPath);
-                return position;
             };
 
             this.createMarker = function () {
-                var position = new google.maps.LatLng(this.checkin.lat, this.checkin.lon);
+                this.position = new google.maps.LatLng(this.checkin.lat, this.checkin.lon);
                 this.marker = new google.maps.Marker({
-                    position: position,
+                    position: this.position,
                     map: map,
                     animation: google.maps.Animation.DROP,
                     title: 'Bus ' + this.checkin.id,
                     icon: '/img/bus.png'
                 });
-                return position;
             };
 
             this.createInfoWindow = function () {
-                this.infowindow = new google.maps.InfoWindow({
+                this.infoWindow = new google.maps.InfoWindow({
                     content: this.getInfoWindowMsg()
                 });
                 var context = this;
                 google.maps.event.addListener(this.marker, 'click', function () { context.markerSelected(context); });
-                google.maps.event.addListener(this.infowindow, 'closeclick', this.markerUnselected);
+                google.maps.event.addListener(this.infoWindow, 'closeclick', this.markerUnselected);
             };
 
             this.createPath = function(pastCheckins) {
@@ -54,12 +54,22 @@
                     strokeOpacity: 1.0,
                     strokeWeight: 2
                 });
-
-                this.path.setMap(map);
             };
 
-            this.markerSelected = function(context) {
-                context.infowindow.open(map, context.marker);
+            this.markerSelected = function (context) {
+                map.setCenter(context.position);
+
+                if (context.infoWindow) {
+                    if (visibleInfoWindow) visibleInfoWindow.close();
+                    visibleInfoWindow = context.infoWindow;
+                    visibleInfoWindow.open(map, context.marker);
+                }
+
+                if (context.path) {
+                    if (visiblePath) visiblePath.setMap(null);
+                    visiblePath = context.path;
+                    visiblePath.setMap(map);
+                }
             };
 
             this.markerUnselected = function() {
@@ -133,8 +143,8 @@
             bounds.extend(userPosition);
             $.each(buses, function () {
                 var bus = new BusModel(this);
-                var position = bus.addToMap();
-                bounds.extend(position);
+                bus.addToMap();
+                bounds.extend(bus.position);
                 busesOnMap.push(bus);
             });
             map.fitBounds(bounds);
