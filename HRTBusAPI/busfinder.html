@@ -117,6 +117,9 @@
                 
                 if(this.path)
                     this.path.setMap(null);
+
+                if (this.stopMarkers)
+                    $.each(this.stopMarkers, function () { this.setMap(null); });
             };
         };
         
