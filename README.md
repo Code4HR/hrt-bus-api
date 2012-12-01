@@ -14,7 +14,7 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
 
 ## Solution
 
-This application periodically pulls[*](#Polling_Hack) the HRT data and caches it for an hour. Each data set from HRT typically contains 10% of the necessary route information. The application's cache is able to build route information to more than 80%. The application exposes the cached data through a RESTful API.
+This application periodically pulls the HRT data and caches it for an hour. Each data set from HRT typically contains 10% of the necessary route information. The application's cache is able to build route information to more than 80%. The application exposes the cached data through a RESTful API.
 
 ## Hosting
 
@@ -89,8 +89,19 @@ Returns an array of all the checkins the bus has made in the last hour
 ]
 ```
 
-## * Polling Hack
+## HRT Data Refresh
 
-Data needs to be fetched from the HRT FTP site once a minute or more. ASP.NET doesn't really like background processes and AppHarbor stops being free when you add a background worker. To get around these issues, the application exposes a trigger at `/refresh`. The trigger causes the app to pull the HRT data from their FTP site and load it into the application. If you browse to the trigger, it will tell you the result of the refresh.
+### /refresh
 
-There is a second application running on AppHarbor that pulls this trigger. It's a simple console app that uses a while loop and thread sleep to make one web request to that link every 20 seconds.
+The application requests this URL once every 20 seconds to refresh the real time bus data from HRT. This URL can be requested from any browser to run a sort of health check on the application. The following data will be returned. If the application is running normally, there should be almost 300 checkins in the FTP file and no more than 100 should be new. There should be around 10,000 checkins in memory and about 90% should have routes. The last auto-refresh (in EST) should be less than 1 minute old.
+
+```
+293 checkins in FTP file.
+0 were new.
+0 new checkins didn't have a route. Routes were found for 0 of those.
+0 were removed because they were more than an hour old.
+801 checkins now in memory.
+34% have a route.
+12 auto refreshes.
+Last auto-refresh at 12/1/2012 4:30:14 PM
+```
