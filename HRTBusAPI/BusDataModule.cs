@@ -110,14 +110,18 @@ namespace HRTBusAPI
                                      "{2} new checkins didn't have a route. Routes were found for {3} of those.<br>" +
                                      "{4} were removed because they were more than an hour old.<br>" +
                                      "{5} checkins now in memory.<br>" +
-                                     "{6}% have a route.",
+                                     "{6}% have a route.<br>" +
+                                     "{7} auto refreshes.<br>" +
+                                     "Last auto-refresh at {8}",
                     newCheckins.Count,
                     newCheckins.Count - duplicates,
                     withoutRoute,
                     routeLookedup,
                     removed,
                     Checkins.Count,
-                    (int)percentWithRoute);
+                    (int)percentWithRoute,
+                    Global.RefreshCount,
+                    Global.LastRefresh);
             }
             catch (Exception ex)
             {
