@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="busfinder.html" />
+    <Content Include="Global.asax" />
     <Content Include="img\bus.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -74,6 +75,9 @@
     <Compile Include="BusCheckin.cs" />
     <Compile Include="BusDataModule.cs" />
     <Compile Include="CustomBoostrapper.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
