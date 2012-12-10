@@ -138,7 +138,7 @@ namespace HRTBusAPI
         public static List<BusCheckin> GetBusCheckinsFromFile(string file)
         {
             if (String.IsNullOrEmpty(file))
-                return null;
+                return new List<BusCheckin>();
 
             return file.Split('\n', '\r')
                 .Select(BusCheckin.Parse)
