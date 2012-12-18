@@ -5,8 +5,8 @@ C# ASP.NET application that processes and exposes HRT Bus Data through an API
 
 ### Examples
 
-- <http://hrtbusapi.apphb.com/example/ui>
-- <http://hrtbusapi.apphb.com/refresh>
+- <http://hrtbusapi.azurewebsites.net/example/ui>
+- <http://hrtbusapi.azurewebsites.net/refresh>
 
 ## Problem
 
@@ -18,7 +18,7 @@ This application periodically pulls the HRT data and caches it for an hour. Each
 
 ## Hosting
 
-The application is currently hosted by [Ben's](https://github.com/bschoenfeld) AppHarbor account at <http://hrtbusapi.apphb.com>. Any push to this repository (including those that don't touch code) will trigger AppHarbor to rebuild and deploy the app, which will clear the cache. The app needs 5-10 minutes to rebuild the cache to the point where it has enough route information to be useful.
+The application is currently hosted by [Ben's](https://github.com/bschoenfeld) Azure account at <http://hrtbusapi.azurewebsites.net>.
 
 ## API
 
