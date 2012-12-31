@@ -10,3 +10,11 @@ TestResults
 
 _ReSharper*/
 packages
+
+.DS_Store
+iron.json
+
+
+scripts/process-ftp/config.json
+
+*.pyc
