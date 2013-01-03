@@ -6,6 +6,3 @@ file "HRTDatabase.py"
 file "config.py"
 file "config.json"
 
-pip "pymongo"
-
-full_remote_build true
