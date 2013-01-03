@@ -24,7 +24,7 @@ class HRTDatabase:
 		if self.database.checkins.find().count() > 0:
 			lastTime = self.database.checkins.find().sort("$natural", -1)[0]["time"]
 			lastBuses = self.database.checkins.find({"time" : lastTime}).distinct("busId")
-			return (lastTime, lastBuses)
+			return {"time": lastTime, "busIds": lastBuses}
 		return None
 	
 	def updateCheckins(self, checkins):

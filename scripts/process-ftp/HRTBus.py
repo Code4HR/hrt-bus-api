@@ -5,6 +5,7 @@ class Checkin:
 		parts = data.split(',')
 		
 		# checkin time
+		# bug here if the file contains checkins from both 12/31/N and 1/1/N+1
 		self.time = datetime.strptime(parts[0] + ' ' + parts[1] + '/' + year, "%H:%M:%S %m/%d/%Y")
 		
 		# bus id

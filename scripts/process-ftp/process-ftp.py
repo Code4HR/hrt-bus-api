@@ -3,55 +3,40 @@ from datetime import datetime, timedelta
 from HRTBus import Checkin
 from HRTDatabase import HRTDatabase
 import config
-		
+
+def checkinProcessed(checkin):
+	if lastCheckins is None:
+		return False
+	if checkin.time == lastCheckins["time"]:
+		return checkin.busId in lastCheckins["busIds"]
+	return checkin.time < lastCheckins["time"]
+
 def process(text):
-	global numSkipped
-	global skip
+	if not text.strip():
+		return
 	
-	if text.strip():
-		try:
-			bc = Checkin(text, str(curTime.year))
-			
-			if not skip:
-				checkinDocs.append(bc.__dict__)
-				if hasattr(bc, 'route'):
-					busRouteMappings[bc.busId] = (bc.route, bc.time)
-			elif bc.time > lastTime or (bc.time == lastTime and bc.busId not in lastBuses):
-				skip = False
-				checkinDocs.append(bc.__dict__)
-				if hasattr(bc, 'route'):
-					busRouteMappings[bc.busId] = (bc.route, bc.time)
-			else:
-				numSkipped += 1
-				
-		except ValueError:
-			#print "Bad data: " + text
-			pass # does nothing
+	try:
+		checkin = Checkin(text, str(curTime.year))
+	except ValueError:
+		return
+	
+	if checkinProcessed(checkin):
+		return
+	
+	checkinDocs.append(checkin.__dict__)
+	if hasattr(checkin, 'route'):
+		busRouteMappings[checkin.busId] = (checkin.route, checkin.time)
 
 c = config.load()
-
-# ftp data doesn't include the year, so get the current time (EST)
-curTime = datetime.utcnow() + timedelta(hours=-5)
-oldTime = curTime + timedelta(minutes=-30)
-
 db = HRTDatabase(c["db_uri"])
+curTime = datetime.utcnow() + timedelta(hours=-5)
 
 busRouteMappings = db.getBusRouteMappings()
-print str(len(busRouteMappings)) + " Bus Route Mappings read from db"
+print "{0} Bus Route Mappings read from db".format(len(busRouteMappings))
 
+lastCheckins = db.getLastCheckinSummary()
 checkinDocs = []
 
-# get last checkin
-lastCheckinInfo = db.getLastCheckinSummary()
-skip = False
-if lastCheckinInfo is not None:
-	lastTime = lastCheckinInfo[0]
-	lastBuses = lastCheckinInfo[1]
-	skip = True
-
-numSkipped = 0
-
-# get the bus checkin data and process it
 ftp = FTP('216.54.15.3')
 ftp.login()
 ftp.cwd('Anrd')
@@ -61,9 +46,7 @@ busRouteMapArray = []
 for key, value in busRouteMappings.items():
 	busRouteMapArray.append({"busId":key, "route": value[0], "time": value[1]})
 db.setBusRouteMappings(busRouteMapArray)
-print str(len(busRouteMappings)) + " Bus Route Mappings inserted into db"
-
-print "Skipped " + str(numSkipped)
+print "{0} Bus Route Mappings inserted into db".format(len(busRouteMappings))
 
 db.updateCheckins(checkinDocs)
 print "Added " + str(len(checkinDocs))
