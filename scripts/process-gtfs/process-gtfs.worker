@@ -1,2 +1,6 @@
 runtime 'python'
 exec "process-gtfs.py"
+
+file "HRTDatabase.py"
+file "config.py"
+file "config.json"

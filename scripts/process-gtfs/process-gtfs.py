@@ -1,9 +1,14 @@
 import json
+import config
 from StringIO import StringIO
 from urllib import urlopen
 from zipfile import ZipFile
 from csv import DictReader
 from datetime import datetime, timedelta
+from HRTDatabase import HRTDatabase
+
+c = config.load()
+db = HRTDatabase(c["db_uri"])
 
 feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
 fileUrl = json.loads(urlopen(feedUrl).read())['data']['datafiles'][0]['file_url']
@@ -23,18 +28,19 @@ for row in calendar:
 		activeServiceIds.append(row['service_id'])
 print activeServiceIds
 
-activeTrips = []
-activeTripIds = []
+activeTrips = {}
 trips = DictReader(zipFile.open("trips.txt"))
 for row in trips:
 	if row['service_id'] in activeServiceIds:
-		activeTrips.append(row)
-		activeTripIds.append(row['trip_id'])
+		activeTrips[row['trip_id']] = row
 print str(len(activeTrips)) + " active trips"
 
 activeStopTimes = []
 stopTimes = DictReader(zipFile.open("stop_times.txt"))
 for row in stopTimes:
-	if row['trip_id'] in activeTripIds:
+	if row['trip_id'] in activeTrips:
+		row['route_id'] = activeTrips[row['trip_id']]['route_id']
 		activeStopTimes.append(row)
 print str(len(activeStopTimes)) + " active stop times"
+
+db.insertGTFS(activeStopTimes, curDate)

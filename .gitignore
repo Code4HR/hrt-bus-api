@@ -18,3 +18,5 @@ iron.json
 scripts/process-ftp/config.json
 
 *.pyc
+
+*.json
