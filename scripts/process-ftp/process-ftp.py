@@ -23,6 +23,9 @@ def process(text):
 		stats['invalid'] += 1
 		return
 	
+	if hasattr(checkin, 'route'):
+		print checkin.__dict__
+			
 	if checkinProcessed(checkin):
 		return
 	

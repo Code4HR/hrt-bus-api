@@ -39,8 +39,14 @@ activeStopTimes = []
 stopTimes = DictReader(zipFile.open("stop_times.txt"))
 for row in stopTimes:
 	if row['trip_id'] in activeTrips:
-		row['route_id'] = activeTrips[row['trip_id']]['route_id']
-		activeStopTimes.append(row)
+		try:
+			row['route_id'] = int(activeTrips[row['trip_id']]['route_id'])
+			row['stop_id'] = int(row['stop_id'])
+			row['timepoint'] = int(row['timepoint'])
+			row['stop_sequence'] = int(row['stop_sequence'])
+			activeStopTimes.append(row)
+		except ValueError:
+			pass 
 print str(len(activeStopTimes)) + " active stop times"
 
 db.insertGTFS(activeStopTimes, curDate)
