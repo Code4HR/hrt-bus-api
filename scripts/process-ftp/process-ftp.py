@@ -22,9 +22,6 @@ def process(text):
 	except ValueError:
 		stats['invalid'] += 1
 		return
-	
-	if hasattr(checkin, 'route'):
-		print checkin.__dict__
 			
 	if checkinProcessed(checkin):
 		return
@@ -33,6 +30,7 @@ def process(text):
 	
 	if hasattr(checkin, 'route'):
 		busRouteMappings[checkin.busId] = (checkin.route, checkin.time)
+		checkin.tripId = db.getTripId(checkin)
 		stats['hadRoute'] += 1
 	elif checkin.busId in busRouteMappings:
 		checkin.route = busRouteMappings[checkin.busId][0]
