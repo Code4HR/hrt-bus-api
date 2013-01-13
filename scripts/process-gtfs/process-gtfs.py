@@ -9,13 +9,14 @@ from HRTDatabase import HRTDatabase
 
 c = config.load()
 db = HRTDatabase(c["db_uri"])
+db.removeOldGTFS(datetime.utcnow() + timedelta(hours=-5))
 
 feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
 fileUrl = json.loads(urlopen(feedUrl).read())['data']['datafiles'][0]['file_url']
 zipFile = ZipFile(StringIO(urlopen(fileUrl).read()))
 
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-curDate = (datetime.utcnow() + timedelta(hours=-5)).date()
+curDate = (datetime.utcnow() + timedelta(days=1, hours=-5)).date()
 curWeekDay = days[curDate.weekday()]
 print curWeekDay + " " + str(curDate)
 
@@ -40,7 +41,10 @@ stopTimes = DictReader(zipFile.open("stop_times.txt"))
 for row in stopTimes:
 	if row['trip_id'] in activeTrips:
 		try:
-			row['route_id'] = int(activeTrips[row['trip_id']]['route_id'])
+			trip = activeTrips[row['trip_id']]
+			row['route_id'] = int(trip['route_id'])
+			row['direction_id'] = int(trip['direction_id'])
+			row['block_id'] = trip['block_id']
 			row['stop_id'] = int(row['stop_id'])
 			row['timepoint'] = int(row['timepoint'])
 			row['stop_sequence'] = int(row['stop_sequence'])
