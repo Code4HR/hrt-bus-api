@@ -30,7 +30,7 @@ def process(text):
 	
 	if hasattr(checkin, 'routeId'):
 		checkin.tripId = db.getTripId(checkin)
-		busRouteMappings[checkin.busId] = {'routeId' : checkin.routeId, 'tripId': checkin.tripId, 'time': checkin.time}
+		busRouteMappings[checkin.busId] = {'busId': checkin.busId, 'routeId' : checkin.routeId, 'tripId': checkin.tripId, 'time': checkin.time}
 		stats['hadRoute'] += 1
 	elif checkin.busId in busRouteMappings:
 		checkin.routeId = busRouteMappings[checkin.busId]['routeId']
