@@ -28,12 +28,13 @@ def process(text):
 	
 	stats['processed'] += 1
 	
-	if hasattr(checkin, 'route'):
-		busRouteMappings[checkin.busId] = (checkin.route, checkin.time)
+	if hasattr(checkin, 'routeId'):
 		checkin.tripId = db.getTripId(checkin)
+		busRouteMappings[checkin.busId] = {'routeId' : checkin.routeId, 'tripId': checkin.tripId, 'time': checkin.time}
 		stats['hadRoute'] += 1
 	elif checkin.busId in busRouteMappings:
-		checkin.route = busRouteMappings[checkin.busId][0]
+		checkin.routeId = busRouteMappings[checkin.busId]['routeId']
+		checkin.tripId = busRouteMappings[checkin.busId]['tripId']
 		stats['foundRoute'] += 1
 	checkinDocs.append(checkin.__dict__)
 
@@ -53,10 +54,7 @@ ftp.login()
 ftp.cwd('Anrd')
 ftp.retrlines('RETR hrtrtf.txt', process)
 
-busRouteMapArray = []
-for key, value in busRouteMappings.items():
-	busRouteMapArray.append({"busId":key, "route": value[0], "time": value[1]})
-db.setBusRouteMappings(busRouteMapArray)
+db.setBusRouteMappings(busRouteMappings.values())
 print "Inserted {0} Bus Route Mappings".format(len(busRouteMappings))
 
 db.updateCheckins(checkinDocs)

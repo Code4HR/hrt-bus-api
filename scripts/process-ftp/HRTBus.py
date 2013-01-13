@@ -22,6 +22,6 @@ class Checkin:
 			self.adherence = int(parts[5])
 			
 		if len(parts) == 10:
-			self.route = int(parts[7])
+			self.routeId = int(parts[7])
 			self.direction = int(parts[8]) - 1
-			self.stop = int(parts[9])
+			self.stopId = int(parts[9])

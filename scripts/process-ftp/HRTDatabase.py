@@ -10,8 +10,8 @@ class HRTDatabase:
 	def getBusRouteMappings(self):
 		mappings = {} 
 		for mapping in self.database['busRouteMappings'].find():
-			if mapping["time"] > datetime.utcnow() + timedelta(hours=-5, minutes=-30):
-				mappings[mapping["busId"]] = (mapping["route"], mapping["time"])
+			if mapping['time'] > datetime.utcnow() + timedelta(hours=-5, minutes=-30):
+				mappings[mapping['busId']] = mapping
 		return mappings
 	
 	def setBusRouteMappings(self, mappings):
@@ -39,8 +39,8 @@ class HRTDatabase:
 		checkinTimePlus1 = (checkin.time + timedelta(minutes=checkin.adherence+1)).strftime('%H:%M:00')
 		checkinTimeMinus1 = (checkin.time + timedelta(minutes=checkin.adherence-1)).strftime('%H:%M:00')
 		scheduledStop = self.database[collectionName].find_one({
-																"route_id" : checkin.route, 
-																"stop_id": checkin.stop, 
+																"route_id" : checkin.routeId, 
+																"stop_id": checkin.stopId, 
 																"direction_id": checkin.direction,
 																"$or" : [
 																	{"arrival_time": checkinTime}, 
