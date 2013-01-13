@@ -14,8 +14,9 @@ class Checkin:
 		# location
 		if parts[4] == 'V':
 			location = parts[3].split('/')
-			self.lat = location[0][:2] + '.' + location[0][2:]
-			self.long = location[1][:3] + '.' + location[1][3:]
+			lat = float(location[0][:2] + '.' + location[0][2:])
+			lon = float(location[1][:3] + '.' + location[1][3:])
+			self.location = [lon, lat]
 		
 		# adherence
 		if parts[6] == 'V':
