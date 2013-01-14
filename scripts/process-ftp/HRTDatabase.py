@@ -35,9 +35,9 @@ class HRTDatabase:
 	
 	def getTripId(self, checkin):
 		collectionName = 'gtfs_' + checkin.time.strftime('%Y%m%d')
-		checkinTime = (checkin.time + timedelta(minutes=checkin.adherence)).strftime('%H:%M:00')
-		checkinTimePlus1 = (checkin.time + timedelta(minutes=checkin.adherence+1)).strftime('%H:%M:00')
-		checkinTimeMinus1 = (checkin.time + timedelta(minutes=checkin.adherence-1)).strftime('%H:%M:00')
+		checkinTime = (checkin.time + timedelta(hours=-5, minutes=checkin.adherence)).strftime('%H:%M:00')
+		checkinTimePlus1 = (checkin.time + timedelta(hours=-5, minutes=checkin.adherence+1)).strftime('%H:%M:00')
+		checkinTimeMinus1 = (checkin.time + timedelta(hours=-5, minutes=checkin.adherence-1)).strftime('%H:%M:00')
 		scheduledStop = self.database[collectionName].find_one({
 																"route_id" : checkin.routeId, 
 																"stop_id": checkin.stopId, 
