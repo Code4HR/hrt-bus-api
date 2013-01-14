@@ -54,3 +54,28 @@ for row in stopTimes:
 print str(len(activeStopTimes)) + " active stop times"
 
 db.insertGTFS(activeStopTimes, curDate)
+
+stops = []
+stopsReader = DictReader(zipFile.open("stops.txt"))
+for row in stopsReader:
+	try:
+		stops.append({
+			'stopId': int(row['stop_id']),
+			'stopName': row['stop_name'],
+			'location': [float(row['stop_lon']), float(row['stop_lat'])]
+		})
+	except ValueError:
+		pass
+print str(len(stops)) + " stops"
+db.insertStops(stops)
+
+routes = []
+routesReader = DictReader(zipFile.open("routes.txt"))
+for row in routesReader:
+	try:
+		row['route_id'] = int(row['route_id'])
+		routes.append(row)
+	except ValueError:
+		pass
+print str(len(routes)) + " routes"
+db.insertRoutes(routes)

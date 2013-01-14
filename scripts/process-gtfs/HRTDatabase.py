@@ -18,4 +18,11 @@ class HRTDatabase:
 			self.database[collectionName].remove()
 			self.database[collectionName].insert(data)
 	
-
+	def insertStops(self, data):
+		self.database['stops'].remove()
+		self.database['stops'].insert(data)
+	
+	def insertRoutes(self, data):
+		self.database['routes'].remove()
+		self.database['routes'].insert(data)
+	
