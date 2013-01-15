@@ -12,11 +12,8 @@ _ReSharper*/
 packages
 
 .DS_Store
-iron.json
 
-
-scripts/process-ftp/config.json
-
+venv
 *.pyc
-
 *.json
+
