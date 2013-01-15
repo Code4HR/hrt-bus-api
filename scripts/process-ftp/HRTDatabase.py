@@ -29,7 +29,7 @@ class HRTDatabase:
 	
 	def updateCheckins(self, checkins):
 		# purge checkins that are more than 30 minutes old
-		self.database['checkins'].remove({"time": {"$lt": datetime.utcnow() + timedelta(hours=-5, minutes=-30)}})
+		self.database['checkins'].remove({"time": {"$lt": datetime.utcnow() + timedelta(minutes=-30)}})
 		if len(checkins) > 0:
 			self.database['checkins'].insert(checkins)
 	
