@@ -29,7 +29,10 @@ def process(text):
 	stats['processed'] += 1
 	
 	if hasattr(checkin, 'routeId'):
-		checkin.tripId = db.getTripId(checkin) or busRouteMappings[checkin.busId]['tripId']
+		if hasattr(checkin, 'adherence'):
+			checkin.tripId = db.getTripId(checkin)
+		if checkin.tripId is None and checkin.busId in busRouteMappings:
+			checkin.tripId = busRouteMappings[checkin.busId]['tripId']
 		busRouteMappings[checkin.busId] = {'busId': checkin.busId, 'routeId' : checkin.routeId, 'tripId': checkin.tripId, 'time': checkin.time}
 		stats['hadRoute'] += 1
 	elif checkin.busId in busRouteMappings:

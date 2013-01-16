@@ -34,10 +34,11 @@ class HRTDatabase:
 			self.database['checkins'].insert(checkins)
 	
 	def getTripId(self, checkin):
-		collectionName = 'gtfs_' + checkin.time.strftime('%Y%m%d')
-		checkinTime = (checkin.time + timedelta(hours=-5, minutes=checkin.adherence)).strftime('%H:%M:00')
-		checkinTimePlus1 = (checkin.time + timedelta(hours=-5, minutes=checkin.adherence+1)).strftime('%H:%M:00')
-		checkinTimeMinus1 = (checkin.time + timedelta(hours=-5, minutes=checkin.adherence-1)).strftime('%H:%M:00')
+		checkinLocalTime = checkin.time + timedelta(hours=-5)
+		collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
+		checkinTime = (checkinLocalTime + timedelta(minutes=checkin.adherence)).strftime('%H:%M:00').lstrip('0')
+		checkinTimePlus1 = (checkinLocalTime + timedelta(minutes=checkin.adherence+1)).strftime('%H:%M:00').lstrip('0')
+		checkinTimeMinus1 = (checkinLocalTime + timedelta(minutes=checkin.adherence-1)).strftime('%H:%M:00').lstrip('0')
 		scheduledStop = self.database[collectionName].find_one({
 																"route_id" : checkin.routeId, 
 																"stop_id": checkin.stopId, 
@@ -46,10 +47,9 @@ class HRTDatabase:
 																	{"arrival_time": checkinTime}, 
 																	{"arrival_time": checkinTimePlus1}, 
 																	{"arrival_time": checkinTimeMinus1}
-																]
-															})
+																]})
 		if scheduledStop is None:
-			print "No scheduled stop found for the following checkin at {0}, {1}, or {2}".format(checkinTimeMinus1, checkinTime, checkinTimePlus1)
+			print "No scheduled stop found for the following checkin at {0}, {1}, or {2} in {3}".format(checkinTimeMinus1, checkinTime, checkinTimePlus1, collectionName)
 			print checkin.__dict__
 			return None
 		return scheduledStop['trip_id']
