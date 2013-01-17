@@ -38,12 +38,18 @@ def getNearestStop(city, intersection):
 def getNextBus(routeId, stopId):
 	time = datetime.utcnow()
 	collectionName = 'gtfs_' + (time + timedelta(hours=-5)).strftime('%Y%m%d')
-	scheduledStops = list(db[collectionName].find({"route_id":routeId, "stop_id":stopId}).sort('arrival_time'))
+	scheduledStops = db[collectionName].find({"route_id":routeId, "stop_id":stopId})
+	data = []
 	for stop in scheduledStops:
-		busOnTrip = db['checkins'].find_one({"tripId":stop["trip_id"]})
-		if busOnTrip is not None:
-			stop['adherence'] = busOnTrip['adherence']
-	return str(scheduledStops)
+		checkins = db['checkins'].find({"tripId":stop["trip_id"]}).sort('time', pymongo.DESCENDING)
+		for checkin in checkins:
+			try:
+				stop['adherence'] = checkin['adherence']
+				break
+			except KeyError:
+				pass
+		data.append(stop)
+	return str(data)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
