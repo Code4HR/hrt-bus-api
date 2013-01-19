@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Flask
+from flask import Flask, render_template
 from geopy import geocoders
 import json
 import os
@@ -12,6 +12,10 @@ dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 @app.route('/')
 def hello():
     return 'Hello World!'
+
+@app.route('/busfinder/')
+def busFinder():
+	return render_template('busfinder.html')
 
 @app.route('/api/routes/')
 def getActiveRoutes():
