@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from flask import Flask
 from geopy import geocoders
+import json
 import os
 import pymongo
 
 app = Flask(__name__)
 db = pymongo.Connection(os.environ['MONGO_URI']).hrt
+dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 
 @app.route('/')
 def hello():
@@ -13,16 +15,16 @@ def hello():
 
 @app.route('/api/routes/')
 def getActiveRoutes():
-	routes = db['checkins'].distinct('routeId')
-	routes.sort()
-	return str(routes)
+	activeRoutes = db['checkins'].distinct('routeId')
+	activeRoutesWithDetails = db['routes'].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
+	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/route/<int:routeId>/')
 def getBusesOnRoute(routeId):
 	checkins = {}
-	for checkin in db['checkins'].find({"routeId":routeId}).sort('time'):
+	for checkin in db['checkins'].find({"routeId":routeId}, fields={'_id': False}).sort('time'):
 		checkins[checkin['busId']] = checkin
-	return str(checkins)
+	return json.dumps(checkins, default=dthandler)
 	
 @app.route('/api/bus/<int:busId>/')
 def getBusHistory(busId):
@@ -32,7 +34,7 @@ def getBusHistory(busId):
 def getNearestStop(city, intersection):
 	geocoders.Google()
 	place, (lat, lng) = geocoders.Google().geocode("{0}, {1}, VA".format(intersection, city))
-	return str(db['stops'].find_one({"location": {"$near": [lng, lat]}}))
+	return json.dumps(db['stops'].find_one({"location": {"$near": [lng, lat]}}))
 
 @app.route('/api/nextbus/<int:routeId>/<int:stopId>/')
 def getNextBus(routeId, stopId):
@@ -49,7 +51,7 @@ def getNextBus(routeId, stopId):
 			except KeyError:
 				pass
 		data.append(stop)
-	return str(data)
+	return json.dumps(data)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
