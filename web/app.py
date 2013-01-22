@@ -17,30 +17,31 @@ def hello():
 def busFinder():
 	return render_template('busfinder.html')
 
-@app.route('/api/routes/')
+@app.route('/api/routes/active/')
 def getActiveRoutes():
 	activeRoutes = db['checkins'].distinct('routeId')
 	activeRoutesWithDetails = db['routes'].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
 	return json.dumps(list(activeRoutesWithDetails))
 
-@app.route('/api/route/<int:routeId>/')
+@app.route('/api/buses/on_route/<int:routeId>/')
 def getBusesOnRoute(routeId):
 	checkins = {}
-	for checkin in db['checkins'].find({"routeId":routeId}, fields={'_id': False}).sort('time'):
+	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}, 'adherence': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time'):
 		checkins[checkin['busId']] = checkin
-	return json.dumps(checkins, default=dthandler)
+	return json.dumps(checkins.values(), default=dthandler)
 	
-@app.route('/api/bus/<int:busId>/')
+@app.route('/api/buses/history/<int:busId>/')
 def getBusHistory(busId):
-	return str(list(db['checkins'].find({"busId":busId}).sort('time', pymongo.DESCENDING)))
+	checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}, 'adherence': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
+	return json.dumps(list(checkins), default=dthandler)
 
-@app.route('/api/stop/<city>/<intersection>/')
+@app.route('/api/stops/near/<city>/<intersection>/')
 def getNearestStop(city, intersection):
 	geocoders.Google()
 	place, (lat, lng) = geocoders.Google().geocode("{0}, {1}, VA".format(intersection, city))
 	return json.dumps(db['stops'].find_one({"location": {"$near": [lng, lat]}}))
 
-@app.route('/api/nextbus/<int:routeId>/<int:stopId>/')
+@app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
 def getNextBus(routeId, stopId):
 	time = datetime.utcnow()
 	collectionName = 'gtfs_' + (time + timedelta(hours=-5)).strftime('%Y%m%d')
