@@ -33,10 +33,15 @@ def process(text):
 			checkin.tripId = db.getTripId(checkin)
 		if checkin.tripId is None and checkin.busId in busRouteMappings:
 			checkin.tripId = busRouteMappings[checkin.busId]['tripId']
-		busRouteMappings[checkin.busId] = {'busId': checkin.busId, 'routeId' : checkin.routeId, 'tripId': checkin.tripId, 'time': checkin.time}
+		busRouteMappings[checkin.busId] = {	'busId': checkin.busId,
+											'routeId' : checkin.routeId,
+											'direction': checkin.direction, 
+											'tripId': checkin.tripId, 
+											'time': checkin.time }
 		stats['hadRoute'] += 1
 	elif checkin.busId in busRouteMappings:
 		checkin.routeId = busRouteMappings[checkin.busId]['routeId']
+		checkin.direction = busRouteMappings[checkin.busId]['direction']
 		checkin.tripId = busRouteMappings[checkin.busId]['tripId']
 		stats['foundRoute'] += 1
 	checkinDocs.append(checkin.__dict__)
