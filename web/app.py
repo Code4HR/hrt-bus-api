@@ -19,7 +19,7 @@ def busFinder():
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():
-	activeRoutes = db['checkins'].distinct('routeId')
+	activeRoutes = db['checkins'].find({'location': {'$exists': True}, 'adherence': {'$exists': True}}).distinct('routeId')
 	activeRoutesWithDetails = db['routes'].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
 	return json.dumps(list(activeRoutesWithDetails))
 
