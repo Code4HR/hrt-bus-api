@@ -1,5 +1,6 @@
-import json
 import config
+import json
+import sys
 from StringIO import StringIO
 from urllib import urlopen
 from zipfile import ZipFile
@@ -9,14 +10,18 @@ from HRTDatabase import HRTDatabase
 
 c = config.load()
 db = HRTDatabase(c["db_uri"])
-db.removeOldGTFS(datetime.utcnow() + timedelta(hours=-5))
+if len(sys.argv) < 2:
+	db.removeOldGTFS(datetime.utcnow() + timedelta(hours=-5))
 
 feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
 fileUrl = json.loads(urlopen(feedUrl).read())['data']['datafiles'][0]['file_url']
 zipFile = ZipFile(StringIO(urlopen(fileUrl).read()))
 
+daysFromNow = 1
+if len(sys.argv) == 2:
+	daysFromNow = int(sys.argv[1])
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-curDate = (datetime.utcnow() + timedelta(days=1, hours=-5)).date()
+curDate = (datetime.utcnow() + timedelta(days=daysFromNow, hours=-5)).date()
 curWeekDay = days[curDate.weekday()]
 print curWeekDay + " " + str(curDate)
 
@@ -46,7 +51,6 @@ for row in stopTimes:
 			row['direction_id'] = int(trip['direction_id'])
 			row['block_id'] = trip['block_id']
 			row['stop_id'] = int(row['stop_id'])
-			row['timepoint'] = int(row['timepoint'])
 			row['stop_sequence'] = int(row['stop_sequence'])
 			activeStopTimes.append(row)
 		except ValueError:
