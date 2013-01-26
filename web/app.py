@@ -11,7 +11,7 @@ dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 
 @app.route('/')
 def hello():
-    return 'Hello World!'
+	return 'Hello World!'
 
 @app.route('/busfinder/')
 def busFinder():
@@ -39,7 +39,14 @@ def getBusHistory(busId):
 def getNearestStop(city, intersection):
 	geocoders.Google()
 	place, (lat, lng) = geocoders.Google().geocode("{0}, {1}, VA".format(intersection, city))
-	return json.dumps(db['stops'].find_one({"location": {"$near": [lng, lat]}}))
+	stops = db['stops'].find({"location": {"$near": [lng, lat]}}, fields={'_id': False}).limit(5)
+	stops = list(stops)
+	
+	collectionName = 'gtfs_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
+	for stop in stops:
+		stop['inboundRoutes'] = db[collectionName].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
+		stop['outboundRoutes'] = db[collectionName].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
+	return json.dumps(stops)
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
 def getNextBus(routeId, stopId):
