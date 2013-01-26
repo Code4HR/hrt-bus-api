@@ -19,20 +19,24 @@ def busFinder():
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():
-	activeRoutes = db['checkins'].find({'location': {'$exists': True}, 'adherence': {'$exists': True}}).distinct('routeId')
+	# List the routes from the checkins
+	activeRoutes = db['checkins'].find({'location': {'$exists': True}}).distinct('routeId')
+	
+	# Get details about those routes from the GTFS data
 	activeRoutesWithDetails = db['routes'].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
 	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/buses/on_route/<int:routeId>/')
 def getBusesOnRoute(routeId):
+	# Get all checkins for the route, only keep the last one for each bus
 	checkins = {}
-	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}, 'adherence': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time'):
+	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time'):
 		checkins[checkin['busId']] = checkin
 	return json.dumps(checkins.values(), default=dthandler)
 	
 @app.route('/api/buses/history/<int:busId>/')
 def getBusHistory(busId):
-	checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}, 'adherence': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
+	checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
 	return json.dumps(list(checkins), default=dthandler)
 
 @app.route('/api/stops/near/<city>/<intersection>/')
