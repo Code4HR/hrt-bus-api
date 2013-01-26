@@ -36,14 +36,19 @@ def getBusesOnRoute(routeId):
 	
 @app.route('/api/buses/history/<int:busId>/')
 def getBusHistory(busId):
+	# Get all checkins for a bus
 	checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
 	return json.dumps(list(checkins), default=dthandler)
 
-@app.route('/api/stops/near/<city>/<intersection>/')
-def getNearestStop(city, intersection):
+@app.route('/api/stops/near/intersection/<city>/<intersection>/')
+def getStopsNearIntersection(city, intersection):
 	geocoders.Google()
 	place, (lat, lng) = geocoders.Google().geocode("{0}, {1}, VA".format(intersection, city))
-	stops = db['stops'].find({"location": {"$near": [lng, lat]}}, fields={'_id': False}).limit(5)
+	return getStopsNear(lat, lng)
+
+@app.route('/api/stops/near/<lat>/<lng>/')
+def getStopsNear(lat, lng):
+	stops = db['stops'].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
 	stops = list(stops)
 	
 	collectionName = 'gtfs_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
