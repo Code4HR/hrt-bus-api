@@ -7,22 +7,26 @@ class HRTDatabase:
 		self.database = self.client.hrt
 
 	def removeOldGTFS(self, date):
-		collectionName = 'gtfs_' + date.strftime('%Y%m%d')
+		print "Removing Old GTFS Data"
+		collectionPrefix = self.genCollectionName('', date)
 		for collection in self.database.collection_names():
-			if collection.startswith('gtfs') and collection != collectionName:
+			if collection.find('_') != -1 and (not collection.endswith(collectionPrefix)):
 				self.database.drop_collection(collection)
 	
 	def insertGTFS(self, data, date):
-		collectionName = 'gtfs_' + date.strftime('%Y%m%d')
+		self.insertData(self.genCollectionName('gtfs_', date), data)
+	
+	def insertStops(self, data, date):
+		self.insertData(self.genCollectionName('stops_', date), data)
+	
+	def insertRoutes(self, data, date):
+		self.insertData(self.genCollectionName('routes_', date), data)
+	
+	def genCollectionName(self, prefix, date):
+		return prefix + date.strftime('%Y%m%d')
+	
+	def insertData(self, collectionName, data):
 		if len(data) > 0:
 			self.database[collectionName].remove()
 			self.database[collectionName].insert(data)
-	
-	def insertStops(self, data):
-		self.database['stops'].remove()
-		self.database['stops'].insert(data)
-	
-	def insertRoutes(self, data):
-		self.database['routes'].remove()
-		self.database['routes'].insert(data)
 	

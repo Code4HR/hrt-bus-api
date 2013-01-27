@@ -10,7 +10,7 @@ from HRTDatabase import HRTDatabase
 
 c = config.load()
 db = HRTDatabase(c["db_uri"])
-if len(sys.argv) < 2:
+if len(sys.argv) != 2:
 	db.removeOldGTFS(datetime.utcnow() + timedelta(hours=-5))
 
 feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
@@ -71,7 +71,7 @@ for row in stopsReader:
 	except ValueError:
 		pass
 print str(len(stops)) + " stops"
-db.insertStops(stops)
+db.insertStops(stops, curDate)
 
 routes = []
 routesReader = DictReader(zipFile.open("routes.txt"))
@@ -82,4 +82,4 @@ for row in routesReader:
 	except ValueError:
 		pass
 print str(len(routes)) + " routes"
-db.insertRoutes(routes)
+db.insertRoutes(routes, curDate)
