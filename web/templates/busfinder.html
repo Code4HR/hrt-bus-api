@@ -15,6 +15,7 @@
         var map;
         var userPosition;
         var busesOnMap = [];
+		var stopsOnMap = [];
         var visibleBus;
 
         function BusModel(checkin) {
@@ -96,14 +97,15 @@
             this.getInfoWindowMsg = function() {
                 var msg = '';
                 msg += 'Bus #' + this.checkin.busId + ' traveling ';
-                msg += this.checkin.direction == 0 ? 'Outbound' : 'Inbound';
-                msg += '<br>is ';
-
-                if (this.checkin.adherence == 0) msg += 'On Time.';
-                else if (this.checkin.adherence == 1) msg += '1 minute Early';
-                else if (this.checkin.adherence > 0) msg += this.checkin.adherence + ' minutes Early';
-                else if (this.checkin.adherence == -1) msg += '1 minute Late';
-                else msg += (this.checkin.adherence * -1) + ' minutes Late';
+                msg += this.checkin.direction == 0 ? 'outbound' : 'inbound';
+                
+				if (this.checkin.adherence) msg += '<br>is ';
+				if (!this.checkin.adherence) msg += '<br>has no adherence'
+                else if (this.checkin.adherence == 0) msg += 'on time';
+                else if (this.checkin.adherence == 1) msg += '1 minute early';
+                else if (this.checkin.adherence > 0) msg += this.checkin.adherence + ' minutes early';
+                else if (this.checkin.adherence == -1) msg += '1 minute late';
+                else msg += (this.checkin.adherence * -1) + ' minutes late';
 
                 var date = new Date(this.checkin.time).addHours(-5);
                 var timePassed = new Date(new Date().getTime() - date).getMinutes();
@@ -128,7 +130,7 @@
             };
         };
         
-        function showMap(position) {
+        function showMapWithPosition(position) {
             userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             var myOptions = {
                 zoom: 11,
@@ -144,6 +146,19 @@
                 map: map,
                 title: "I am here!"
             });
+        }
+
+		function showMap() {
+            userPosition = new google.maps.LatLng(36.863794,-76.285608);
+            var myOptions = {
+                zoom: 11,
+                center: userPosition,
+                mapTypeControl: false,
+                navigationControlOptions: { style: google.maps.NavigationControlStyle.SMALL },
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var mapcanvas = $('#mapcanvas');
+            map = new google.maps.Map(mapcanvas[0], myOptions);
         }
 
         function clearBusesOnMap() {
@@ -178,13 +193,56 @@
         function error(msg) {
             var errMsg = typeof msg == 'string' ? msg : "Geolocation failed";
             $('#msg').html(errMsg);
+			showMap();
         }
+
+		function showRouteSelect() {
+			$('.option').hide();
+			$('#routeSelect').show();
+		}
+		
+		function showStopSearchOptions() {
+			$('.option').hide();
+			$('#stopSearchOption').show();
+		}
+		
+		function showStopSearch() {
+			$('.option').hide();
+			$('#stopSearch').show();
+		}
+		
+		function locationSearchOnPosition() {
+			$.getJSON('/api/stops/near/' + userPosition.lat() + '/' + userPosition.lng() + '/')
+			 .done(showLocationSearchResults);
+		}
+		
+		function locationSearchOnIntersection() {
+			$.getJSON('/api/stops/near/intersection/' + $('#city').val() + '/' + $('#intersection').val() + '/')
+			 .done(showLocationSearchResults);
+		}
+		
+		function showLocationSearchResults(results) {
+			var bounds = new google.maps.LatLngBounds();
+			stopsOnMap = []
+			$.each(results, function() {
+				var position = new google.maps.LatLng(this.location[1], this.location[0]);
+				bounds.extend(position);
+                stopsOnMap.push(new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    animation: google.maps.Animation.DROP,
+                    title: this.stopName,
+                    icon: '/static/bus.png'
+                }));	
+			});
+			map.fitBounds(bounds);
+		}
 
         $(document).ready(function () {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showMap, error);
+                navigator.geolocation.getCurrentPosition(showMapWithPosition, error);
             } else {
-                error('Geolocation not supported');
+                showMap();
             }
 
             $.getJSON("/api/routes/active/")
@@ -203,9 +261,27 @@
         <h3>HRT Buses</h3>
     </div>
     <div data-role="content">
-        <select id="routeNumber" onchange="showBuses()">
-            <option selected="selected" value="">Select Route</option>
-        </select>
+		<div id="useStopOption" class="option">
+			<button onclick="showStopSearchOptions()">Find My Stop</button>
+			<button onclick="showRouteSelect()">Skip To Routes</button>
+		</div>
+		
+		<div id="stopSearchOption"  class="option" style="display:none;">
+			<button onclick="locationSearchOnPosition()">Use Current Location</button>
+			<button onclick="showStopSearch()">Use Intersection</button>
+		</div>
+		
+		<div id="stopSearch" class="option" style="display:none;">
+			Intersection:<input id="intersection" type="text" placeholder="High and Court"/>
+			City: <input id="city" type="text" placeholder="Portsmouth"/>
+			<button onclick="locationSearchOnIntersection()">Search</button>
+		</div>
+		
+		<div id="routeSelect" class="option" style="display:none;">
+			<select id="routeNumber" onchange="showBuses()">
+				<option selected="selected" value="">Select Route</option>
+			</select>
+		</div>
     </div>
     <div id="msg"></div>
     <div id="mapcanvas" style="height: 400px; width: 100%;"></div>
