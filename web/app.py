@@ -9,6 +9,14 @@ app = Flask(__name__)
 db = pymongo.Connection(os.environ['MONGO_URI']).hrt
 dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 
+curDateTime  = datetime.utcnow() + timedelta(hours=-5)
+collectionPrefix = curDateTime.strftime('%Y%m%d')
+
+@app.before_request
+def beforeRequest():
+	curDateTime  = datetime.utcnow() + timedelta(hours=-5)
+	collectionPrefix = curDateTime.strftime('%Y%m%d')
+
 @app.route('/')
 def hello():
 	return 'Hello World!'
@@ -23,8 +31,7 @@ def getActiveRoutes():
 	activeRoutes = db['checkins'].find({'location': {'$exists': True}}).distinct('routeId')
 	
 	# Get details about those routes from the GTFS data
-	collectionName = 'routes_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
-	activeRoutesWithDetails = db[collectionName].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
+	activeRoutesWithDetails = db['routes_' + collectionPrefix].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
 	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/buses/on_route/<int:routeId>/')
@@ -49,21 +56,17 @@ def getStopsNearIntersection(city, intersection):
 
 @app.route('/api/stops/near/<lat>/<lng>/')
 def getStopsNear(lat, lng):
-	collectionName = 'stops_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
-	stops = db[collectionName].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
+	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
 	stops = list(stops)
 	
-	collectionName = 'gtfs_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
 	for stop in stops:
-		stop['inboundRoutes'] = db[collectionName].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
-		stop['outboundRoutes'] = db[collectionName].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
+		stop['inboundRoutes'] = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
+		stop['outboundRoutes'] = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
 	return json.dumps(stops)
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
 def getNextBus(routeId, stopId):
-	time = datetime.utcnow()
-	collectionName = 'gtfs_' + (time + timedelta(hours=-5)).strftime('%Y%m%d')
-	scheduledStops = db[collectionName].find({"route_id":routeId, "stop_id":stopId})
+	scheduledStops = db['gtfs_' + collectionPrefix].find({"route_id":routeId, "stop_id":stopId})
 	data = []
 	for stop in scheduledStops:
 		checkins = db['checkins'].find({"tripId":stop["trip_id"]}).sort('time', pymongo.DESCENDING)
