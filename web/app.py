@@ -23,7 +23,8 @@ def getActiveRoutes():
 	activeRoutes = db['checkins'].find({'location': {'$exists': True}}).distinct('routeId')
 	
 	# Get details about those routes from the GTFS data
-	activeRoutesWithDetails = db['routes'].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
+	collectionName = 'routes_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
+	activeRoutesWithDetails = db[collectionName].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
 	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/buses/on_route/<int:routeId>/')
@@ -48,7 +49,8 @@ def getStopsNearIntersection(city, intersection):
 
 @app.route('/api/stops/near/<lat>/<lng>/')
 def getStopsNear(lat, lng):
-	stops = db['stops'].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
+	collectionName = 'stops_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
+	stops = db[collectionName].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
 	stops = list(stops)
 	
 	collectionName = 'gtfs_' + (datetime.utcnow() + timedelta(hours=-5)).strftime('%Y%m%d')
