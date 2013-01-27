@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pymongo import Connection
+from pymongo import Connection, GEO2D
 
 class HRTDatabase:
 	def __init__(self, uri):
@@ -17,7 +17,9 @@ class HRTDatabase:
 		self.insertData(self.genCollectionName('gtfs_', date), data)
 	
 	def insertStops(self, data, date):
-		self.insertData(self.genCollectionName('stops_', date), data)
+		collectionName = self.genCollectionName('stops_', date)
+		self.insertData(collectionName, data)
+		self.database[collectionName].ensure_index( [('location', GEO2D)] )
 	
 	def insertRoutes(self, data, date):
 		self.insertData(self.genCollectionName('routes_', date), data)
