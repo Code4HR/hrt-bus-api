@@ -1,6 +1,8 @@
 runtime 'python'
 exec "process-gtfs.py"
 
+pip "pymongo"
+
 file "HRTDatabase.py"
 file "config.py"
 file "config.json"
