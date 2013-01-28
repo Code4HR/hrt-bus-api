@@ -70,20 +70,10 @@
             $.each(busesOnMap, function() { this.destroy(); });
             busesOnMap.length = 0;
         }
-
-		function showRouteSelect() {
-			$('.option').hide();
-			$('#routeSelect').show();
-		}
 		
-		function showStopSearchOptions() {
+		function showContent(contentId) {
 			$('.option').hide();
-			$('#stopSearchOption').show();
-		}
-		
-		function showStopSearch() {
-			$('.option').hide();
-			$('#stopSearch').show();
+			$('#' + contentId).show();
 		}
 		
 		function locationSearchOnPosition() {
@@ -183,13 +173,13 @@
     </div>
     <div id="content" data-role="content">
 		<div id="useStopOption" class="option">
-			<button onclick="showStopSearchOptions()">Find My Stop</button>
-			<button onclick="showRouteSelect()">Skip To Routes</button>
+			<button onclick="showContent('stopSearchOption')">Find My Stop</button>
+			<button onclick="showContent('routeSelect')">Skip To Routes</button>
 		</div>
 		
 		<div id="stopSearchOption"  class="option" style="display:none;">
 			<button onclick="locationSearchOnPosition()">Use Current Location</button>
-			<button onclick="showStopSearch()">Use Intersection</button>
+			<button onclick="showContent('stopSearch')">Use Intersection</button>
 		</div>
 		
 		<div id="stopSearch" class="option" style="display:none;">
