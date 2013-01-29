@@ -51,7 +51,7 @@ def getBusHistory(busId):
 @app.route('/api/stops/near/intersection/<city>/<intersection>/')
 def getStopsNearIntersection(city, intersection):
 	geocoders.Google()
-	place, (lat, lng) = geocoders.Google().geocode("{0}, {1}, VA".format(intersection, city))
+	place, (lat, lng) = geocoders.Google().geocode("{0}, {1}, VA".format(intersection, city), exactly_one=False)[0]
 	return getStopsNear(lat, lng)
 
 @app.route('/api/stops/near/<lat>/<lng>/')
