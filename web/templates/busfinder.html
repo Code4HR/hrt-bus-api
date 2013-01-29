@@ -6,6 +6,7 @@
     <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 	<script type="text/javascript" src="/static/bus.js"></script>
+	<script type="text/javascript" src="/static/stop.js"></script>
     <script type="text/javascript">
 
 		Date.prototype.addHours = function(h){
@@ -19,6 +20,7 @@
         var busesOnMap = [];
 		var stopsOnMap = [];
         var visibleBus;
+		var selectedStop;
         
         function createMap(position) {
             map = new google.maps.Map($('#mapcanvas')[0], {
@@ -56,6 +58,7 @@
 
 		            var bounds = new google.maps.LatLngBounds();
 		            bounds.extend(userPosition);
+					if(selectedStop) bounds.extend(selectedStop.position);
 		            $.each(buses, function () {
 		                var bus = new Bus(this);
 		                bus.addToMap();
@@ -71,75 +74,52 @@
             busesOnMap.length = 0;
         }
 		
-		function showContent(contentId) {
-			$('.option').hide();
-			$('#' + contentId).show();
-		}
-		
 		function locationSearchOnPosition() {
-			$.getJSON('/api/stops/near/' + userPosition.lat() + '/' + userPosition.lng() + '/')
+			$.getJSON('/api/stops/near/' + userPosition.lat() + '/' + userPosition.lng())
 			 .done(showLocationSearchResults);
 		}
 		
 		function locationSearchOnIntersection() {
-			$.getJSON('/api/stops/near/intersection/' + $('#city').val() + '/' + $('#intersection').val() + '/')
+			$.getJSON('/api/stops/near/intersection/' + $('#city').val() + '/' + $('#intersection').val())
 			 .done(showLocationSearchResults);
 		}
 		
 		function showLocationSearchResults(results) {
 			clearStopSearchResults();
-				
+			
 			var bounds = new google.maps.LatLngBounds();
-			$.each(results, function() {
-				var position = new google.maps.LatLng(this.location[1], this.location[0]);
-				bounds.extend(position);
-				
-                var marker = new google.maps.Marker({
-                    position: position,
-                    map: map,
-                    animation: google.maps.Animation.DROP,
-                    title: this.stopName
-                });
-				stopsOnMap.push(marker);
-				
-				infoWindowContent = this.stopName;
-				infoWindowContent += '<br>Stop ID: ' + this.stopId;
-				infoWindowContent += '<br>Inbound Routes: ' + (this.inboundRoutes.length ? this.inboundRoutes.join() : 'None');
-				infoWindowContent += '<br>Outbound Routes: ' + (this.outboundRoutes.length ? this.outboundRoutes.join() : 'None');
-				infoWindowContent += '<br><button id="chooseStop_'+ this.stopId +'" style="width:100%; font-size:18px;">Choose Stop</button>';
-				infoWindow = new google.maps.InfoWindow({
-                    content: infoWindowContent
-                });
-
-				var context = this;
-                google.maps.event.addListener(marker, 'click', function () {
-					infoWindow.open(map, marker);
-				});	
-				google.maps.event.addListener(infoWindow, 'domready', function () {
-					$('#chooseStop_' + context.stopId).click(function(){setStop(context);})
-				});
-				
-			});
-			map.fitBounds(bounds);
+            $.each(results, function () {
+                var stop = new Stop(this);
+                stop.addToMap();
+                bounds.extend(stop.position);
+                stopsOnMap.push(stop);
+            });
+            map.fitBounds(bounds);
 		}
 		
 		function clearStopSearchResults() {
 			while(stopsOnMap.length)
-				stopsOnMap.pop().setMap(null);
+				stopsOnMap.pop().destroy();
 		}
 		
-		function setStop(stop) {
-			alert(stop.stopId);
-			stopPosition = new google.maps.LatLng(stop.location[1], stop.location[0]);
-			var marker = new google.maps.Marker({
-                position: stopPosition,
-                map: map,
-                title: stop.stopName
-            });
-			//map.setCenter(stopPosition);
+		function setSelectedStop(stop) {
+			selectedStop = stop;
 			
 			clearStopSearchResults();
-			showRouteSelect();
+			stop.createMarker();
+	        stop.createInfoWindow();
+	
+			var bounds = new google.maps.LatLngBounds();
+			bounds.extend(stop.position);
+			bounds.extend(userPosition);
+            map.fitBounds(bounds);
+
+			showContent('routeSelect');
+		}
+		
+		function showContent(contentId) {
+			$('.option').hide();
+			$('#' + contentId).show();
 		}
 		
 		function geoError() {

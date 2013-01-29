@@ -108,4 +108,4 @@ function Bus(checkin) {
         if (this.stopMarkers)
             $.each(this.stopMarkers, function () { this.setMap(null); });
     };
-};
+}
