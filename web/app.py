@@ -61,7 +61,9 @@ def getStopsNear(lat, lng):
 	
 	for stop in stops:
 		stop['inboundRoutes'] = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
+		stop['inboundRoutes'].sort()
 		stop['outboundRoutes'] = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
+		stop['outboundRoutes'].sort()
 	return json.dumps(stops)
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
