@@ -66,7 +66,6 @@
 		                busesOnMap.push(bus);
 		            });
 		            map.fitBounds(bounds);
-					setMapSize();
                 });
         }
 
@@ -96,7 +95,6 @@
                 stopsOnMap.push(stop);
             });
             map.fitBounds(bounds);
-			setMapSize();
 		}
 		
 		function clearStopSearchResults() {
@@ -115,7 +113,6 @@
 			bounds.extend(stop.position);
 			bounds.extend(userPosition);
             map.fitBounds(bounds);
-			setMapSize();
 
 			showContent('routeSelect');
 		}
