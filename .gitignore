@@ -10,3 +10,14 @@ TestResults
 
 _ReSharper*/
 packages
+
+.DS_Store
+
+venv
+*.pyc
+*.json
+
+
+.env
+
+web/debug.py
