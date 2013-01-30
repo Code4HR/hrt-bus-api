@@ -81,6 +81,18 @@ def getNextBus(routeId, stopId):
 		data.append(stop)
 	return json.dumps(data)
 
+ def averageAdherence():
+	adherenceList = []
+	for thing in db['checkins'].find({'adherence': {'$exists': True}}):
+		adherenceList.append(thing['adherence'])
+	avg = sum(adherenceList) / float(len(adherenceList))
+	result = db['checkins'].aggregate([
+		{"$group": {"_id": "$routeId", "late": {"$avg": "$adherence"}}}#, 
+		#{"$match" : {"late" : { "$lt" : 0 } } },
+		#{"$group": {"_id": -1, "avgLate": "$late", "other": 1}}
+	])
+	return 'Hello World!<br>' + str(result) + '<br>' + str(avg)
+
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
