@@ -39,11 +39,10 @@ function setMapSize() {
 
 function showBuses() {
     clearBusesOnMap();
-    $('#msg').val('');
     
     $.getJSON("/api/buses/on_route/" + $("#routeNumber").val())
         .done(function (buses) {
-            $('#msg').text(buses.length + ' buses found');
+            $('#routeInfo .numBuses').text(buses.length);
 
             var bounds = new google.maps.LatLngBounds();
             bounds.extend(userPosition);
@@ -56,6 +55,30 @@ function showBuses() {
             });
             map.fitBounds(bounds);
         });
+
+	if(selectedStop) {
+		$.getJSON("/api/stop_times/" + $("#routeNumber").val() + "/" + selectedStop.data.stopId)
+	        .done(function (stops) {
+				console.log(stops);
+				
+				var msg = "";
+				if(stops.length == 0) {
+					msg = "Nothing scheduled for your stop"
+				} else {
+					var stopMsgs = []
+					$.each(stops, function () {
+						var date = new Date(this.arrival_time);
+						var msg = date.toLocaleTimeString();
+						if(this.busId)
+							msg += " (Bus " + this.busId + " " + this.adherence + ") ";
+						stopMsgs.push(msg);
+					});
+					msg = stopMsgs.join();
+				}
+					
+				$('#scheduledStopInfo .details').text(msg);
+			});
+	}
 }
 
 function clearBusesOnMap() {
@@ -103,6 +126,8 @@ function setSelectedStop(stop) {
 	bounds.extend(userPosition);
     map.fitBounds(bounds);
 
+	$('#scheduledStopInfo').show();
+	$('#scheduledStopInfo .stopId').text(stop.data.stopId);
 	showContent('routeSelect');
 }
 
