@@ -29,6 +29,7 @@ def process(text):
 	stats['processed'] += 1
 	
 	if hasattr(checkin, 'routeId'):
+		checkin.tripId = None
 		if hasattr(checkin, 'adherence'):
 			checkin.tripId = db.getTripId(checkin)
 			if checkin.tripId is not None:
