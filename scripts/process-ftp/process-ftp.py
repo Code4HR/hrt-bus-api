@@ -29,8 +29,11 @@ def process(text):
 	stats['processed'] += 1
 	
 	if hasattr(checkin, 'routeId'):
+		checkin.tripId = None
 		if hasattr(checkin, 'adherence'):
 			checkin.tripId = db.getTripId(checkin)
+			if checkin.tripId is not None:
+				stats['foundTrip'] += 1
 		if checkin.tripId is None and checkin.busId in busRouteMappings:
 			checkin.tripId = busRouteMappings[checkin.busId]['tripId']
 		busRouteMappings[checkin.busId] = {	'busId': checkin.busId,
@@ -55,7 +58,7 @@ print "Read {0} Bus Route Mappings".format(len(busRouteMappings))
 
 lastCheckins = db.getLastCheckinSummary()
 checkinDocs = []
-stats = {'lines': 0, 'invalid': 0, 'processed': 0, 'hadRoute': 0, 'foundRoute': 0}
+stats = {'lines': 0, 'invalid': 0, 'processed': 0, 'hadRoute': 0, 'foundRoute': 0, 'foundTrip': 0}
 
 ftp = FTP('216.54.15.3')
 ftp.login()
