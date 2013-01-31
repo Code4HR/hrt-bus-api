@@ -38,7 +38,7 @@ def getActiveRoutes():
 def getBusesOnRoute(routeId):
 	# Get all checkins for the route, only keep the last one for each bus
 	checkins = {}
-	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time'):
+	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
 		checkins[checkin['busId']] = checkin
 	return json.dumps(checkins.values(), default=dthandler)
 	
@@ -73,7 +73,8 @@ def getNextBus(routeId, stopId):
 	data = list(lastStop)
 	data += list(scheduledStops)
 	for stop in data:
-		checkins = db['checkins'].find({'tripId':stop['trip_id']}).sort('time', pymongo.DESCENDING)
+		stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+		checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
 		for checkin in checkins:
 			try:
 				stop['adherence'] = checkin['adherence']
