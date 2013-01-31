@@ -68,18 +68,20 @@ def getStopsNear(lat, lng):
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
 def getNextBus(routeId, stopId):
-	scheduledStops = db['gtfs_' + collectionPrefix].find({"route_id":routeId, "stop_id":stopId})
-	data = []
-	for stop in scheduledStops:
-		checkins = db['checkins'].find({"tripId":stop["trip_id"]}).sort('time', pymongo.DESCENDING)
+	scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
+	lastStop = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$lt': datetime.utcnow()}}).sort('arrival_time', pymongo.DESCENDING).limit(1)
+	data = list(lastStop)
+	data += list(scheduledStops)
+	for stop in data:
+		checkins = db['checkins'].find({'tripId':stop['trip_id']}).sort('time', pymongo.DESCENDING)
 		for checkin in checkins:
 			try:
 				stop['adherence'] = checkin['adherence']
+				stop['busId'] = checkin['busId']
 				break
 			except KeyError:
 				pass
-		data.append(stop)
-	return json.dumps(data)
+	return json.dumps(data, default=dthandler)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.

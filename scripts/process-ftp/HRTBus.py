@@ -6,7 +6,7 @@ class Checkin:
 		
 		# checkin time
 		# bug here if the file contains checkins from both 12/31/N and 1/1/N+1
-		self.time = datetime.strptime(parts[0] + ' ' + parts[1] + '/' + year, "%H:%M:%S %m/%d/%Y") - timedelta(hours=-5)
+		self.time = datetime.strptime(parts[0] + ' ' + parts[1] + '/' + year, "%H:%M:%S %m/%d/%Y") + timedelta(hours=5)
 		
 		# bus id
 		self.busId = int(parts[2])

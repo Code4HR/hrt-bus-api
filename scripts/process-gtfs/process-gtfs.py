@@ -5,7 +5,7 @@ from StringIO import StringIO
 from urllib import urlopen
 from zipfile import ZipFile
 from csv import DictReader
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from HRTDatabase import HRTDatabase
 
 c = config.load()
@@ -22,6 +22,7 @@ if len(sys.argv) == 2:
 	daysFromNow = int(sys.argv[1])
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 curDate = (datetime.utcnow() + timedelta(days=daysFromNow, hours=-5)).date()
+midnight = datetime.combine(curDate, time.min)
 curWeekDay = days[curDate.weekday()]
 print curWeekDay + " " + str(curDate)
 
@@ -52,6 +53,13 @@ for row in stopTimes:
 			row['block_id'] = trip['block_id']
 			row['stop_id'] = int(row['stop_id'])
 			row['stop_sequence'] = int(row['stop_sequence'])
+			
+			arriveTime = row['arrival_time'].split(':')
+			row['arrival_time'] = midnight + timedelta(hours=int(arriveTime[0])+5, minutes=int(arriveTime[1]))
+			
+			departTime = row['departure_time'].split(':')
+			row['departure_time'] = midnight + timedelta(hours=int(departTime[0])+5, minutes=int(departTime[1]))
+			
 			activeStopTimes.append(row)
 		except ValueError:
 			pass 
