@@ -25,6 +25,10 @@ def hello():
 def busFinder():
 	return render_template('busfinder.html')
 
+@app.route('/busfinder-backbone/')
+def busFinderBackbone():
+	return render_template('busfinder-backbone.html')
+
 @app.route('/api/routes/active/')
 def getActiveRoutes():
 	# List the routes from the checkins

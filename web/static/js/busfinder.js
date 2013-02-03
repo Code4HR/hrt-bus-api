@@ -87,11 +87,13 @@ function clearBusesOnMap() {
 }
 
 function locationSearchOnPosition() {
+	showContent('stopSearchResults');
 	$.getJSON('/api/stops/near/' + userPosition.lat() + '/' + userPosition.lng())
 	 .done(showLocationSearchResults);
 }
 
 function locationSearchOnIntersection() {
+	showContent('stopSearchResults');
 	$.getJSON('/api/stops/near/intersection/' + $('#city').val() + '/' + $('#intersection').val())
 	 .done(showLocationSearchResults);
 }

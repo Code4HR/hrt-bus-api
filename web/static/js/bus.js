@@ -14,7 +14,7 @@ function Bus(checkin) {
             map: map,
             animation: google.maps.Animation.DROP,
             title: 'Bus ' + this.checkin.busId,
-            icon: '/static/bus.png'
+            icon: '/static/img/bus.png'
         });
     };
 

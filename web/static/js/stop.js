@@ -12,7 +12,8 @@ function Stop(data) {
             position: this.position,
             map: map,
             animation: google.maps.Animation.DROP,
-            title: this.data.stopName
+            title: this.data.stopName,
+			icon: '/static/img/busstop.png'
         });
     };
 
