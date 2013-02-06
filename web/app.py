@@ -28,6 +28,10 @@ def busFinder():
 @app.route('/busfinder-backbone/')
 def busFinderBackbone():
 	return render_template('busfinder-backbone.html')
+	
+@app.route('/busfinder-backbone/<view>/')
+def busFinderBackboneView(view):
+	return render_template('busfinder-backbone.html')
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():

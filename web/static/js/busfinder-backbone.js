@@ -26,36 +26,70 @@ $(function(){
 		}
 	});
 	
-	var ContentView = Backbone.View.extend({
-		el: $("#content"),
+	var HomeView = Backbone.View.extend({
+		template: _.template($('#home-template').html()),
 		
 		events: {
 			"click #findStop": "findStop"
 		},
 		
-		findStop: function() {
-			App.Router.navigate('findStop');
-			this.showSection('#beginStopSearch');
+		render: function() {
+			this.$el.html(this.template());
+			return this;
 		},
 		
-		showSection: function(section) {
-			$('.section').hide();
-			$(section).show();
+		findStop: function() {
+			App.Router.navigate('findStop/', {trigger: true});
+		}
+	});
+	
+	var BeginStopSearchView = Backbone.View.extend({
+		template: _.template($('#begin-stop-search-template').html()),
+		
+		events: {
+			"click #stopSearch-location": "stopSearchOnLocation",
+			"click #stopSearch-intersection": "stopSearchOnIntersection"
+		},
+		
+		render: function() {
+			this.$el.html(this.template());
+			return this;
+		},
+		
+		stopSearchOnLocation: function() {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(success, fail);
+			}
+		},
+		
+		stopSearchOnIntersection: function() {
+		}
+	});
+	
+	var ContentView = Backbone.View.extend({
+		el: $("#content"),
+		
+		setSubView: function(subView) {
+			this.subView && this.subView.remove();
+			this.subView = subView;
+			this.$el.html(this.subView.render().el);
+			this.$el.trigger('create');
+			this.trigger('contentChanged');
 		}
 	});
 	
 	var Router = Backbone.Router.extend({
 		 routes: {
 			"": "home",
-			"findStop": "findStop"
+			"findStop/": "findStop"
 		 },
 		
 		home: function() {
-			App.ContentView.showSection('#home');
+			App.ContentView.setSubView(new HomeView);
 		},
 		
 		findStop: function() {
-			App.ContentView.showSection('#beginStopSearch');
+			App.ContentView.setSubView(new BeginStopSearchView);
 		}
 	});
 	
@@ -65,5 +99,6 @@ $(function(){
 		Router: new Router
 	};
 	
+	App.ContentView.on('contentChanged', App.MapView.render, App.MapView);
 	Backbone.history.start({pushState: true, root: "/busfinder-backbone/"});
 });
