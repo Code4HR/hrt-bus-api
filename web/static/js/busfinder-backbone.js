@@ -105,6 +105,28 @@ $(function(){
 		}
 	});
 	
+	var StopSearchResultsView = Backbone.View.extend({
+		template: _.template($('#stop-search-results-template').html()),
+		
+		events: {
+		},
+		
+		initialize: function() {
+			this.collection.on('reset', this.render, this);
+			this.collection.fetch();
+		},
+		
+		render: function() {
+			if(this.collection && this.collection.length > 0) {
+				this.$el.html(this.template(this.collection.at(0).toJSON()));
+			} else {
+				this.$el.html(this.template({stopName:'Loading...', inboundRoutes:[], outboundRoutes:[]}));
+			}
+			this.$el.trigger('create');
+			return this;
+		}
+	});
+	
 	var ContentView = Backbone.View.extend({
 		el: $("#content"),
 		
@@ -139,11 +161,15 @@ $(function(){
 		},
 		
 		runStopSearchOnIntersection: function(intersection, city) {
-			
+			var stops = new Backbone.Collection;
+			stops.url = '/api/stops/near/intersection/' + city + '/' + intersection + '/';
+			App.ContentView.setSubView(new StopSearchResultsView({collection: stops}));
 		},
 		
 		runStopSearchOnLatLng: function(lat, lng) {
-			
+			var stops = new Backbone.Collection;
+			stops.url = '/api/stops/near/' + lat + '/' + lng + '/';
+			App.ContentView.setSubView(new StopSearchResultsView({collection: stops}));
 		}
 	});
 	

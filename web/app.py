@@ -27,7 +27,7 @@ def busFinder():
 
 @app.route('/busfinder-backbone/')
 @app.route('/busfinder-backbone/<path:view>/')
-def busFinderBackboneView(view):
+def busFinderBackboneView(view=None):
 	return render_template('busfinder-backbone.html')
 
 @app.route('/api/routes/active/')

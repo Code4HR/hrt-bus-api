@@ -47,10 +47,18 @@
 	</script>
 	
 	<script type="text/template" id="stop-search-results-template">
-		<div id="stopName">Loading...</div>
-		<div id="stopId">Select a route</div>
-		<div id="inboundRoutes">Inbound: <span class="routes"></span></div>
-		<div id="outboundRoutes">Outbound: <span class="routes"></span></div>
+		<div style="text-align:center"><b><%= stopName %></b></div>
+		<select id="routeNumber" onchange="showBuses()">
+			<option selected="selected" value="">Select Route</option>
+			
+			<% _.each(inboundRoutes, function(route) { %>
+				<option value="<%= route %>"><%= route %> - Inbound</option>
+			<% }); %>
+			
+			<% _.each(outboundRoutes, function(route) { %>
+				<option value="<%= route %>"><%= route %> - Outbound</option>
+			<% }); %>
+		</select>
 		<div class="ui-grid-a">
 			<div class="ui-block-a"><button type="button" data-theme="c" data-icon="arrow-l">Previous</button></div>
 			<div class="ui-block-b"><button type="button" data-theme="c" data-icon="arrow-r" data-iconpos="right">Next</button></div>	   
