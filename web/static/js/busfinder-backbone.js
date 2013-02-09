@@ -43,7 +43,7 @@ $(function(){
 		}
 	});
 	
-	var BeginStopSearchView = Backbone.View.extend({
+	var StopSearchView = Backbone.View.extend({
 		template: _.template($('#begin-stop-search-template').html()),
 		
 		events: {
@@ -57,12 +57,22 @@ $(function(){
 		},
 		
 		stopSearchOnLocation: function() {
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(success, fail);
-			}
 		},
 		
 		stopSearchOnIntersection: function() {
+			App.Router.navigate('findStop/intersection/', {trigger: true});
+		}
+	});
+	
+	var StopSearchIntersectionView = Backbone.View.extend({
+		template: _.template($('#stop-search-template').html()),
+		
+		events: {
+		},
+		
+		render: function() {
+			this.$el.html(this.template());
+			return this;
 		}
 	});
 	
@@ -81,7 +91,8 @@ $(function(){
 	var Router = Backbone.Router.extend({
 		 routes: {
 			"": "home",
-			"findStop/": "findStop"
+			"findStop/": "findStop",
+			"findStop/intersection/": "findStopByIntersection"
 		 },
 		
 		home: function() {
@@ -89,7 +100,11 @@ $(function(){
 		},
 		
 		findStop: function() {
-			App.ContentView.setSubView(new BeginStopSearchView);
+			App.ContentView.setSubView(new StopSearchView);
+		},
+		
+		findStopByIntersection: function() {
+			App.ContentView.setSubView(new StopSearchIntersectionView);
 		}
 	});
 	
