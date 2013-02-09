@@ -14,8 +14,9 @@ $(function(){
 			_.bindAll(this);
 			$(window).resize(this.render);
 			
-			this.userPosition = new google.maps.LatLng(36.863794,-76.285608);
-			this.center = this.userPosition;
+			this.downtownNorfolk = new google.maps.LatLng(36.863794,-76.285608);
+			this.center = this.downtownNorfolk;
+			navigator.geolocation && navigator.geolocation.getCurrentPosition(this.setUserPosition);
 			this.render();
 		},
 		
@@ -23,6 +24,16 @@ $(function(){
 			this.$el.height($(window).height() - $('#header').outerHeight() - $('#content').outerHeight());
 			Map.setCenter(this.center);
 			return this;
+		},
+		
+		setUserPosition: function(position) {
+			this.userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+			this.userPositionMarker = new google.maps.Marker({
+	            position: this.userPosition,
+	            map: Map
+	        });
+			this.center = this.userPosition;
+			this.render();
 		}
 	});
 	
