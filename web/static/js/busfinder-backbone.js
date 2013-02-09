@@ -6,6 +6,8 @@ $(function(){
         navigationControlOptions: { style: google.maps.NavigationControlStyle.SMALL },
         mapTypeId: google.maps.MapTypeId.ROADMAP
     });
+
+	var UserLocation = null;
 	
 	var MapView = Backbone.View.extend({
 		el: $("#mapcanvas"),
@@ -16,7 +18,7 @@ $(function(){
 			
 			this.downtownNorfolk = new google.maps.LatLng(36.863794,-76.285608);
 			this.center = this.downtownNorfolk;
-			navigator.geolocation && navigator.geolocation.getCurrentPosition(this.setUserPosition);
+			navigator.geolocation && navigator.geolocation.getCurrentPosition(this.setUserLocation);
 			this.render();
 		},
 		
@@ -26,13 +28,13 @@ $(function(){
 			return this;
 		},
 		
-		setUserPosition: function(position) {
-			this.userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+		setUserLocation: function(position) {
+			UserLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 			this.userPositionMarker = new google.maps.Marker({
-	            position: this.userPosition,
+	            position: UserLocation,
 	            map: Map
 	        });
-			this.center = this.userPosition;
+			this.center = UserLocation;
 			this.render();
 		}
 	});
@@ -68,6 +70,11 @@ $(function(){
 		},
 		
 		stopSearchOnLocation: function() {
+			if(UserLocation) {
+				App.Router.navigate('findStop/' + UserLocation.lat() + '/' + UserLocation.lng() + '/', {trigger: true});
+			} else {
+				alert("Sorry, but I don't know where you are.");
+			}
 		},
 		
 		stopSearchOnIntersection: function() {
@@ -103,7 +110,8 @@ $(function(){
 		 routes: {
 			"": "home",
 			"findStop/": "findStop",
-			"findStop/intersection/": "findStopByIntersection"
+			"findStop/intersection/": "findStopByIntersection",
+			"findStop/:lat/:lng/": "runStopSearchOnLatLng"
 		 },
 		
 		home: function() {
@@ -116,6 +124,10 @@ $(function(){
 		
 		findStopByIntersection: function() {
 			App.ContentView.setSubView(new StopSearchIntersectionView);
+		},
+		
+		runStopSearchOnLatLng: function(lat, lng) {
+			alert('Search Lat: ' + lat + ' Lng: ' + lng);
 		}
 	});
 	
