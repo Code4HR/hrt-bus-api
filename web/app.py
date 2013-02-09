@@ -26,10 +26,7 @@ def busFinder():
 	return render_template('busfinder.html')
 
 @app.route('/busfinder-backbone/')
-def busFinderBackbone():
-	return render_template('busfinder-backbone.html')
-	
-@app.route('/busfinder-backbone/<view>/')
+@app.route('/busfinder-backbone/<path:view>/')
 def busFinderBackboneView(view):
 	return render_template('busfinder-backbone.html')
 
