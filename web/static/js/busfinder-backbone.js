@@ -10,7 +10,7 @@ $(function(){
 	var UserLocation = null;
 	
 	var MapView = Backbone.View.extend({
-		el: $("#mapcanvas"),
+		el: $('#mapcanvas'),
 		
 		initialize: function() {
 			_.bindAll(this);
@@ -43,7 +43,7 @@ $(function(){
 		template: _.template($('#home-template').html()),
 		
 		events: {
-			"click #findStop": "findStop"
+			'click #findStop': 'findStop'
 		},
 		
 		render: function() {
@@ -60,8 +60,8 @@ $(function(){
 		template: _.template($('#begin-stop-search-template').html()),
 		
 		events: {
-			"click #stopSearch-location": "stopSearchOnLocation",
-			"click #stopSearch-intersection": "stopSearchOnIntersection"
+			'click #stopSearch-location': 'stopSearchOnLocation',
+			'click #stopSearch-intersection': 'stopSearchOnIntersection'
 		},
 		
 		render: function() {
@@ -86,11 +86,22 @@ $(function(){
 		template: _.template($('#stop-search-template').html()),
 		
 		events: {
+			'click #search': 'search'
 		},
 		
 		render: function() {
 			this.$el.html(this.template());
 			return this;
+		},
+		
+		search: function() {
+			var intersection = this.$('#intersection').val();
+			var city = this.$('#city').val();
+			if(intersection == "" || city == "") {
+				alert("Please enter an intersection and a city");
+			} else {
+				App.Router.navigate('findStop/intersection/' + intersection + '/' + city + '/', {trigger: true});
+			}
 		}
 	});
 	
@@ -111,6 +122,7 @@ $(function(){
 			"": "home",
 			"findStop/": "findStop",
 			"findStop/intersection/": "findStopByIntersection",
+			"findStop/intersection/:intersection/:city/": "runStopSearchOnIntersection",
 			"findStop/:lat/:lng/": "runStopSearchOnLatLng"
 		 },
 		
@@ -126,8 +138,12 @@ $(function(){
 			App.ContentView.setSubView(new StopSearchIntersectionView);
 		},
 		
+		runStopSearchOnIntersection: function(intersection, city) {
+			
+		},
+		
 		runStopSearchOnLatLng: function(lat, lng) {
-			alert('Search Lat: ' + lat + ' Lng: ' + lng);
+			
 		}
 	});
 	
