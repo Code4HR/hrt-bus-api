@@ -131,6 +131,7 @@ $(function(){
 				viewModel.curStop = this.currentCollection + 1;
 				viewModel.numStops = this.collection.length;
 				this.$el.html(this.template(viewModel));
+				this.renderStopMarker(viewModel);
 			} else {
 				this.$el.html(this.template({
 					stopName:'Loading...', 
@@ -143,6 +144,23 @@ $(function(){
 			}
 			this.$el.trigger('create');
 			return this;
+		},
+		
+		renderStopMarker: function(stop) {
+			if(this.marker) {
+				this.marker.setMap(null);
+			}
+			
+			if(stop) {
+	        	this.marker = new google.maps.Marker({
+		            position: new google.maps.LatLng(stop.location[1], stop.location[0]),
+		            map: Map,
+		            title: stop.stopName,
+					icon: '/static/img/busstop.png'
+		        });
+				Map.panTo(this.marker.getPosition());
+				Map.setZoom(18);
+			}
 		},
 		
 		stopsLoaded: function() {
