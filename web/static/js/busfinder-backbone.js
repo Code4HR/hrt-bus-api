@@ -117,7 +117,8 @@ $(function(){
 		
 		events: {
 			'click #prev-stop': 'prevStop',
-			'click #next-stop': 'nextStop'
+			'click #next-stop': 'nextStop',
+			'change #route': 'routeSelected'
 		},
 		
 		initialize: function() {
@@ -176,6 +177,13 @@ $(function(){
 		nextStop: function() {
 			this.currentCollection = (this.currentCollection + 1).mod(this.collection.length);
 			this.render();
+		},
+		
+		routeSelected: function() {
+			var stopId = this.collection.at(this.currentCollection).get('stopId');
+			var route = this.$('#route option:selected').val();
+			var direction = this.$('#route option:selected').parent()[0].id;
+			App.Router.navigate('nextBus/' + stopId + '/' + route + '/' + direction + '/', {trigger: true});
 		}
 	});
 	
@@ -197,7 +205,8 @@ $(function(){
 			"findStop/": "findStop",
 			"findStop/intersection/": "findStopByIntersection",
 			"findStop/intersection/:intersection/:city/": "runStopSearchOnIntersection",
-			"findStop/:lat/:lng/": "runStopSearchOnLatLng"
+			"findStop/:lat/:lng/": "runStopSearchOnLatLng",
+			"nextBus/:stop/:route/:direction": "nextBus"
 		 },
 		
 		home: function() {
@@ -222,6 +231,10 @@ $(function(){
 			var stops = new Backbone.Collection;
 			stops.url = '/api/stops/near/' + lat + '/' + lng + '/';
 			App.ContentView.setSubView(new StopSearchResultsView({collection: stops}));
+		},
+		
+		nextBus: function(stop, route, direction) {
+			
 		}
 	});
 	

@@ -49,18 +49,18 @@
 	<script type="text/template" id="stop-search-results-template">
 		<div style="text-align:center"><b><%= stopName %><% if(stopId != 0) { %> (Stop <%= stopId %>)<% } %></b></div>
 		
-		<select id="routeNumber" onchange="showBuses()">
+		<select id="route">
 			<option selected="selected" value="">Select Route</option>
 			
-			<optgroup label="Inbound">
+			<optgroup label="Inbound" id="1">
 			<% _.each(inboundRoutes, function(route) { %>
 				<option value="<%= route.route_id %>"><%= route.route_short_name %> - <%= route.route_long_name %></option>
 			<% }); %>
 			</optgroup>
 			
-			<optgroup label="Outbound">
+			<optgroup label="Outbound" id="0">
 			<% _.each(outboundRoutes, function(route) { %>
-				<option value="<%= route.route_id %>"><%= route.route_short_name %> " - " <%= route.route_long_name %></option>
+				<option value="<%= route.route_id %>"><%= route.route_short_name %> - <%= route.route_long_name %></option>
 			<% }); %>
 			</optgroup>
 		</select>
