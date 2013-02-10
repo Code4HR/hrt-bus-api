@@ -52,13 +52,17 @@
 		<select id="routeNumber" onchange="showBuses()">
 			<option selected="selected" value="">Select Route</option>
 			
+			<optgroup label="Inbound">
 			<% _.each(inboundRoutes, function(route) { %>
-				<option value="<%= route %>"><%= route %> - Inbound</option>
+				<option value="<%= route.route_id %>"><%= route.route_short_name %> - <%= route.route_long_name %></option>
 			<% }); %>
+			</optgroup>
 			
+			<optgroup label="Outbound">
 			<% _.each(outboundRoutes, function(route) { %>
-				<option value="<%= route %>"><%= route %> - Outbound</option>
+				<option value="<%= route.route_id %>"><%= route.route_short_name %> " - " <%= route.route_long_name %></option>
 			<% }); %>
+			</optgroup>
 		</select>
 		
 		<div class="ui-grid-b">
