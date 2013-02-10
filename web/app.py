@@ -61,7 +61,7 @@ def getStopsNearIntersection(city, intersection):
 
 @app.route('/api/stops/near/<lat>/<lng>/')
 def getStopsNear(lat, lng):
-	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
+	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(6)
 	stops = list(stops)
 	
 	for stop in stops:

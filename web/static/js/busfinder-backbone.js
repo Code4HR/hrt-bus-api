@@ -1,4 +1,11 @@
 $(function(){
+	
+	// Fix JavaScript Modulo of negative numbers
+	// http://javascript.about.com/od/problemsolving/a/modulobug.htm
+	Number.prototype.mod = function(n) {
+		return ((this%n)+n)%n;
+	};
+	
 	// Global Map object
 	var Map = new google.maps.Map($('#mapcanvas')[0], {
         zoom: 11,
@@ -109,21 +116,48 @@ $(function(){
 		template: _.template($('#stop-search-results-template').html()),
 		
 		events: {
+			'click #prev-stop': 'prevStop',
+			'click #next-stop': 'nextStop'
 		},
 		
 		initialize: function() {
-			this.collection.on('reset', this.render, this);
+			this.collection.on('reset', this.stopsLoaded, this);
 			this.collection.fetch();
 		},
 		
 		render: function() {
 			if(this.collection && this.collection.length > 0) {
-				this.$el.html(this.template(this.collection.at(0).toJSON()));
+				var viewModel = this.collection.at(this.currentCollection).toJSON();
+				viewModel.curStop = this.currentCollection + 1;
+				viewModel.numStops = this.collection.length;
+				this.$el.html(this.template(viewModel));
 			} else {
-				this.$el.html(this.template({stopName:'Loading...', inboundRoutes:[], outboundRoutes:[]}));
+				this.$el.html(this.template({
+					stopName:'Loading...', 
+					stopId: 0,
+					inboundRoutes:[], 
+					outboundRoutes:[],
+					curStop:0,
+					numStops:0
+				}));
 			}
 			this.$el.trigger('create');
 			return this;
+		},
+		
+		stopsLoaded: function() {
+			this.currentCollection = 0;
+			this.render();
+		},
+		
+		prevStop: function() {
+			this.currentCollection = (this.currentCollection - 1).mod(this.collection.length);
+			this.render();
+		},
+		
+		nextStop: function() {
+			this.currentCollection = (this.currentCollection + 1).mod(this.collection.length);
+			this.render();
 		}
 	});
 	

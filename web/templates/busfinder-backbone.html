@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="/static/css/jquery.mobile-1.3.0-beta.1.min.css" />
 	<style type="text/css">
 		.ui-content {
-			padding: 3px 15px;
+			padding: 5px 15px 0px 15px;
 		}
 		#stopSearchResults {
 			text-align: center;
@@ -47,7 +47,8 @@
 	</script>
 	
 	<script type="text/template" id="stop-search-results-template">
-		<div style="text-align:center"><b><%= stopName %></b></div>
+		<div style="text-align:center"><b><%= stopName %><% if(stopId != 0) { %> (Stop <%= stopId %>)<% } %></b></div>
+		
 		<select id="routeNumber" onchange="showBuses()">
 			<option selected="selected" value="">Select Route</option>
 			
@@ -59,9 +60,11 @@
 				<option value="<%= route %>"><%= route %> - Outbound</option>
 			<% }); %>
 		</select>
-		<div class="ui-grid-a">
-			<div class="ui-block-a"><button type="button" data-theme="c" data-icon="arrow-l">Previous</button></div>
-			<div class="ui-block-b"><button type="button" data-theme="c" data-icon="arrow-r" data-iconpos="right">Next</button></div>	   
+		
+		<div class="ui-grid-b">
+			<div class="ui-block-a"><button id="prev-stop" type="button" data-theme="c" data-icon="arrow-l">Previous</button></div>
+			<div class="ui-block-b" style="text-align:center;"><p><%= curStop %> / <%= numStops %></p></div>
+			<div class="ui-block-b"><button id="next-stop" type="button" data-theme="c" data-icon="arrow-r" data-iconpos="right">Next</button></div>	   
 		</div>
 	</script>
 	
