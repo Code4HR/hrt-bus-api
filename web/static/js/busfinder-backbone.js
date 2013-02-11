@@ -206,6 +206,7 @@ $(function(){
 		
 		render: function() {
 			this.$el.html(this.template({routes: this.collection.toJSON()}));
+			this.$el.trigger('create');
 			return this;
 		},
 		
@@ -229,7 +230,7 @@ $(function(){
 	var Router = Backbone.Router.extend({
 		 routes: {
 			"": "home",
-			"routes/": "routes",
+			"routes/": "busRoutes",
 			"findStop/": "findStop",
 			"findStop/intersection/": "findStopByIntersection",
 			"findStop/intersection/:intersection/:city/": "runStopSearchOnIntersection",
@@ -241,7 +242,7 @@ $(function(){
 			App.ContentView.setSubView(new HomeView);
 		},
 		
-		routes: function() {
+		busRoutes: function() {
 			var routes = new Backbone.Collection;
 			routes.url = '/api/routes/active/';
 			App.ContentView.setSubView(new RouteView({collection: routes}));
