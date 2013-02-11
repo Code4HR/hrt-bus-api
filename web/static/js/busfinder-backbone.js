@@ -50,7 +50,8 @@ $(function(){
 		template: _.template($('#home-template').html()),
 		
 		events: {
-			'click #findStop': 'findStop'
+			'click #findStop': 'findStop',
+			'click #goToRoutes': 'goToRoutes'
 		},
 		
 		render: function() {
@@ -60,6 +61,10 @@ $(function(){
 		
 		findStop: function() {
 			App.Router.navigate('findStop/', {trigger: true});
+		},
+		
+		goToRoutes: function() {
+			App.Router.navigate('routes/', {trigger: true});
 		}
 	});
 	
@@ -187,6 +192,28 @@ $(function(){
 		}
 	});
 	
+	var RouteView = Backbone.View.extend({
+		template: _.template($('#route-view-template').html()),
+		
+		events: {
+			'change #route': 'routeSelected'
+		},
+		
+		initialize: function() {
+			this.collection.on('reset', this.render, this);
+			this.collection.fetch();
+		},
+		
+		render: function() {
+			this.$el.html(this.template({routes: this.collection.toJSON()}));
+			return this;
+		},
+		
+		routeSelected: function() {
+			var route = this.$('#route option:selected').val();
+		}
+	});
+	
 	var ContentView = Backbone.View.extend({
 		el: $("#content"),
 		
@@ -202,6 +229,7 @@ $(function(){
 	var Router = Backbone.Router.extend({
 		 routes: {
 			"": "home",
+			"routes/": "routes",
 			"findStop/": "findStop",
 			"findStop/intersection/": "findStopByIntersection",
 			"findStop/intersection/:intersection/:city/": "runStopSearchOnIntersection",
@@ -211,6 +239,12 @@ $(function(){
 		
 		home: function() {
 			App.ContentView.setSubView(new HomeView);
+		},
+		
+		routes: function() {
+			var routes = new Backbone.Collection;
+			routes.url = '/api/routes/active/';
+			App.ContentView.setSubView(new RouteView({collection: routes}));
 		},
 		
 		findStop: function() {
