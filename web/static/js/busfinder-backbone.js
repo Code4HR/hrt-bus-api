@@ -200,18 +200,33 @@ $(function(){
 		},
 		
 		initialize: function() {
+			this.buses = new Backbone.Collection;
+			this.buses.on('reset', this.render, this);
+			
+			if(this.options.route) {
+				this.selectedRoute = this.options.route;
+				this.getBusesForSelectedRoute();
+			}
+			
 			this.collection.on('reset', this.render, this);
 			this.collection.fetch();
 		},
 		
 		render: function() {
-			this.$el.html(this.template({routes: this.collection.toJSON()}));
+			this.$el.html(this.template({ routes: this.collection.toJSON(), buses: this.buses.length }));
+			this.selectedRoute && this.$('#route').val(this.selectedRoute);
 			this.$el.trigger('create');
 			return this;
 		},
 		
+		getBusesForSelectedRoute: function() {
+			this.buses.url = '/api/buses/on_route/' + this.selectedRoute;
+			this.buses.fetch();
+		},
+		
 		routeSelected: function() {
-			var route = this.$('#route option:selected').val();
+			this.selectedRoute = this.$('#route option:selected').val();
+			this.getBusesForSelectedRoute();
 		}
 	});
 	
