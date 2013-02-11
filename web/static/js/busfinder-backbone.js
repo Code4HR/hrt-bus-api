@@ -227,6 +227,7 @@ $(function(){
 		routeSelected: function() {
 			this.selectedRoute = this.$('#route option:selected').val();
 			this.getBusesForSelectedRoute();
+			App.Router.navigate('routes/' + this.selectedRoute + '/');
 		}
 	});
 	
@@ -245,7 +246,7 @@ $(function(){
 	var Router = Backbone.Router.extend({
 		 routes: {
 			"": "home",
-			"routes/": "busRoutes",
+			"routes/(:route/)": "busRoutes",
 			"findStop/": "findStop",
 			"findStop/intersection/": "findStopByIntersection",
 			"findStop/intersection/:intersection/:city/": "runStopSearchOnIntersection",
@@ -257,10 +258,10 @@ $(function(){
 			App.ContentView.setSubView(new HomeView);
 		},
 		
-		busRoutes: function() {
+		busRoutes: function(route) {
 			var routes = new Backbone.Collection;
 			routes.url = '/api/routes/active/';
-			App.ContentView.setSubView(new RouteView({collection: routes}));
+			App.ContentView.setSubView(new RouteView({collection: routes, route: route}));
 		},
 		
 		findStop: function() {
