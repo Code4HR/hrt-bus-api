@@ -199,9 +199,11 @@ $(function(){
 			'change #route': 'routeSelected'
 		},
 		
+		busViews: [],
+		
 		initialize: function() {
 			this.buses = new Backbone.Collection;
-			this.buses.on('reset', this.render, this);
+			this.buses.on('reset', this.addBuses, this);
 			
 			if(this.options.route) {
 				this.selectedRoute = this.options.route;
@@ -219,6 +221,19 @@ $(function(){
 			return this;
 		},
 		
+		addBus: function(bus) {
+			this.busViews.push(new BusView({model: bus}));
+		},
+		
+		addBuses: function() {
+			while(this.busViews.length) {
+				this.busViews.pop().destroy();
+			}
+			
+			this.buses.each(this.addBus, this);
+			this.render();
+		},
+		
 		getBusesForSelectedRoute: function() {
 			this.buses.url = '/api/buses/on_route/' + this.selectedRoute;
 			this.buses.fetch();
@@ -229,6 +244,28 @@ $(function(){
 			this.getBusesForSelectedRoute();
 			App.Router.navigate('routes/' + this.selectedRoute + '/');
 		}
+	});
+	
+	var BusView = Backbone.View.extend({
+		initialize: function() {
+			this.createMarker();
+		},
+		
+		createMarker: function () {
+	        this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
+	        this.marker = new google.maps.Marker({
+	            position: this.position,
+	            map: Map,
+	            animation: google.maps.Animation.DROP,
+	            title: 'Bus ' + this.model.busId,
+	            icon: '/static/img/bus.png'
+	        });
+	    },
+	
+		destroy: function () {
+			this.marker && this.marker.setMap(null);
+			this.remove();
+	    }
 	});
 	
 	var ContentView = Backbone.View.extend({
