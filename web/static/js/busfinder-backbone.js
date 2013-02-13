@@ -33,7 +33,7 @@ $(function(){
 			
 			this.downtownNorfolk = new google.maps.LatLng(36.863794,-76.285608);
 			this.center = this.downtownNorfolk;
-			navigator.geolocation && navigator.geolocation.getCurrentPosition(this.setUserLocation);
+			navigator.geolocation && navigator.geolocation.getCurrentPosition(this.setUserLocation, this.showGeolocationError);
 			this.render();
 		},
 		
@@ -51,6 +51,10 @@ $(function(){
 	        });
 			this.center = UserLocation;
 			this.render();
+		},
+		
+		showGeolocationError: function(error) {
+			alert('Geolocation Error: ' + error);
 		}
 	});
 	
@@ -434,5 +438,5 @@ $(function(){
 	};
 	
 	App.ContentView.on('contentChanged', App.MapView.render, App.MapView);
-	Backbone.history.start({pushState: true, root: "/busfinder-backbone/"});
+	Backbone.history.start({ pushState: true, root: '/busfinder-backbone/' });
 });

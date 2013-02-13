@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/css/jquery.mobile-1.3.0-beta.1.min.css" />
+    <link rel="stylesheet" href="/static/css/jquery.mobile-1.3.0-rc.1.min.css" />
 	<style type="text/css">
 		.ui-content {
 			padding: 5px 15px 0px 15px;
@@ -23,9 +23,24 @@
     <div id="content" data-role="content"></div>
     <div id="mapcanvas" style="height: 100%; width: 100%;"></div>
 
+	<script src="/static/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript">
+		$(document).on("mobileinit", function () {
+		    console.log('mobileinit')
+		    $.mobile.ajaxEnabled = false;
+		    // Let Backbone handle click events 
+		    $.mobile.linkBindingEnabled = false;
+		    $.mobile.listview.prototype.options.icon = "";
+		    // Don't listen to hash changes. Let backbone do this
+		    $.mobile.hashListeningEnabled = false;
+		    $.mobile.pushStateEnabled = false;
+		    // No hoverdelay for buttons. Use FastClick for 0 delay a tags
+		    $.mobile.buttonMarkup.hoverDelay = 0;
+		});
+	</script>
+	
 	<script src="http://maps.google.com/maps/api/js?sensor=true"></script>
-	<script src="/static/js/jquery-1.9.0.min.js"></script>
-    <script src="/static/js/jquery.mobile-1.3.0-beta.1.min.js"></script>
+    <script src="/static/js/jquery.mobile-1.3.0-rc.1.js"></script>
 	<script src="/static/js/underscore-min.js"></script>
 	<script src="/static/js/backbone-min.js"></script>
 	<script src="/static/js/busfinder-backbone.js"></script>
