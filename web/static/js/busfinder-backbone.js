@@ -6,6 +6,14 @@ $(function(){
 		return ((this%n)+n)%n;
 	};
 	
+	
+	// Create addHours function for Date object so we can
+	// easily get from GMT to EST (probably need to find a library for this)
+	Date.prototype.addHours = function(h){
+	    this.setHours(this.getHours()+h);
+	    return this;
+	}
+	
 	// Global Map object
 	var Map = new google.maps.Map($('#mapcanvas')[0], {
         zoom: 11,
@@ -223,6 +231,7 @@ $(function(){
 		
 		addBus: function(bus) {
 			var busView = new BusView({model: bus});
+			busView.on('markerSelected', this.showBusDetails, this);
 			this.bounds.extend(busView.position);
 			this.busViews.push(busView);
 		},
@@ -250,24 +259,76 @@ $(function(){
 			this.selectedRoute = this.$('#route option:selected').val();
 			this.getBusesForSelectedRoute();
 			App.Router.navigate('routes/' + this.selectedRoute + '/');
+		},
+		
+		showBusDetails: function(busView) {
+			this.selectedBus && this.selectedBus.hideDetails();
+			this.selectedBus = busView;
+			
+			Map.panTo(this.selectedBus.position);
+			this.selectedBus.showDetails();
 		}
 	});
 	
 	var BusView = Backbone.View.extend({
 		initialize: function() {
+			_.bindAll(this);
 			this.createMarker();
 		},
 		
 		createMarker: function () {
-	        this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
-	        this.marker = new google.maps.Marker({
-	            position: this.position,
-	            map: Map,
-	            animation: google.maps.Animation.DROP,
-	            title: 'Bus ' + this.model.busId,
-	            icon: '/static/img/bus.png'
-	        });
+			this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
+
+			this.marker = new google.maps.Marker({
+				position: this.position,
+				map: Map,
+				animation: google.maps.Animation.DROP,
+				title: 'Bus ' + this.model.busId,
+				icon: '/static/img/bus.png'
+			});
+
+			this.infoWindow = new google.maps.InfoWindow({ 
+				content: this.getInfoWindowMsg() 
+			});
+			google.maps.event.addListener(this.marker, 'click', this.markerSelected);
+		},
+		
+		getInfoWindowMsg: function() {
+			var msg = '';
+			msg += 'Bus #' + this.model.get('busId') + ' traveling ';
+			msg += this.model.get('direction') == 0 ? 'outbound' : 'inbound';
+			
+			var adherence = this.model.get('adherence');
+			if (adherence != null) msg += '<br>is ';
+			if (adherence == null) msg += '<br>has no adherence'
+			else if (adherence == 0) msg += 'on time';
+			else if (adherence == 1) msg += '1 minute early';
+			else if (adherence > 0) msg += adherence + ' minutes early';
+			else if (adherence == -1) msg += '1 minute late';
+			else msg += (adherence * -1) + ' minutes late';
+
+			var date = new Date(this.model.get('time')).addHours(-5);
+			var timePassed = new Date(new Date().getTime() - date).getMinutes();
+
+			msg += '<br>as of ';
+			if (timePassed == 0) msg += 'just now.';
+			else if (timePassed == 1) msg += '1 minute ago.';
+			else msg += timePassed + ' minutes ago.';
+
+			return msg;
 	    },
+		
+		markerSelected: function() {
+			this.trigger('markerSelected', this);
+		},
+		
+		showDetails: function() {
+			this.infoWindow.open(Map, this.marker);
+		},
+		
+		hideDetails: function() {
+			this.infoWindow.close();
+		},
 	
 		destroy: function () {
 			this.marker && this.marker.setMap(null);
