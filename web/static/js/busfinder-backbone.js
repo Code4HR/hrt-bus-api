@@ -273,6 +273,10 @@ $(function(){
 	var BusView = Backbone.View.extend({
 		initialize: function() {
 			_.bindAll(this);
+			this.collection = new Backbone.Collection;
+			this.collection.url = '/api/buses/history/' + this.model.get('busId');
+			this.collection.on('reset', this.createPath, this);
+			this.collection.fetch();
 			this.createMarker();
 		},
 		
@@ -317,6 +321,30 @@ $(function(){
 
 			return msg;
 	    },
+
+		createPath: function () {
+			var stopMarkers = [];
+			var pathCoordinates = [];
+			this.collection.each(function (checkin) {
+				var position = new google.maps.LatLng(checkin.get('location')[1], checkin.get('location')[0]);
+				pathCoordinates.push(position);
+
+				if (checkin.get('stopId')) {
+					stopMarkers.push(new google.maps.Marker({
+						position: position,
+						icon: { path: google.maps.SymbolPath.CIRCLE, scale: 2 }
+					}));
+				}
+			});
+
+			this.stopMarkers = stopMarkers;
+			this.path = new google.maps.Polyline({
+				path: pathCoordinates,
+				strokeColor: "#FF0000",
+				strokeOpacity: 1.0,
+				strokeWeight: 2
+			});
+		},
 		
 		markerSelected: function() {
 			this.trigger('markerSelected', this);
@@ -324,13 +352,18 @@ $(function(){
 		
 		showDetails: function() {
 			this.infoWindow.open(Map, this.marker);
+			this.path.setMap(Map);
+			$.each(this.stopMarkers, function () { this.setMap(Map); });
 		},
 		
 		hideDetails: function() {
 			this.infoWindow.close();
+			this.path.setMap(null);
+			$.each(this.stopMarkers, function () { this.setMap(null); });
 		},
 	
 		destroy: function () {
+			this.hideDetails();
 			this.marker && this.marker.setMap(null);
 			this.remove();
 	    }
