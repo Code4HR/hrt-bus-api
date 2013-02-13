@@ -222,7 +222,9 @@ $(function(){
 		},
 		
 		addBus: function(bus) {
-			this.busViews.push(new BusView({model: bus}));
+			var busView = new BusView({model: bus});
+			this.bounds.extend(busView.position);
+			this.busViews.push(busView);
 		},
 		
 		addBuses: function() {
@@ -230,7 +232,12 @@ $(function(){
 				this.busViews.pop().destroy();
 			}
 			
+			this.bounds = new google.maps.LatLngBounds();
 			this.buses.each(this.addBus, this);
+			
+			UserLocation && this.bounds.extend(UserLocation);
+			Map.fitBounds(this.bounds);
+			
 			this.render();
 		},
 		
