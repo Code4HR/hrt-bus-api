@@ -13,6 +13,10 @@ $(function(){
 	    this.setHours(this.getHours()+h);
 	    return this;
 	}
+	Date.prototype.addMinutes = function(h){
+	    this.setMinutes(this.getMinutes()+h);
+	    return this;
+	}
 	
 	// Global Map object
 	var Map = new google.maps.Map($('#mapcanvas')[0], {
@@ -373,6 +377,67 @@ $(function(){
 	    }
 	});
 	
+	var NextBusView = Backbone.View.extend({
+		template: _.template($('#stop-times-template').html()),
+		
+		events: {
+			'click #prev': 'prevTime',
+			'click #next': 'nextTime'
+		},
+		
+		initialize: function() {
+			this.collection.on('reset', this.stopTimesLoaded, this);
+			this.collection.fetch();
+		},
+		
+		render: function() {
+			if(this.collection && this.collection.length > 0) {
+				var model = this.collection.at(this.currentCollection);
+				var date = new Date(model.get('arrival_time'));
+				var adherence = model.get('adherence');
+				if(adherence) {
+					date = date.addMinutes(adherence);
+				}
+				
+				var now = new Date();
+				var stopTimeMinutesFromNow = (date.getTime() - now.getTime()) / 1000 / 60 | 0;
+				
+				var viewModel = model.toJSON();
+				
+				if(stopTimeMinutesFromNow < 0) {
+					viewModel.stopTimeMsg = 'left ' + (stopTimeMinutesFromNow * -1) + ' minutes ago';	
+				} else {
+					viewModel.stopTimeMsg = 'arrives in ' + stopTimeMinutesFromNow + ' minutes';
+				}
+				
+				viewModel.curItem = this.currentCollection + 1;
+				viewModel.numItems = this.collection.length;
+				if(!viewModel.busId) viewModel.busId = null;
+				
+				this.$el.html(this.template(viewModel));
+			} else {
+				this.$el.html('Loading...');
+			}
+			this.$el.trigger('create');
+			return this;
+		},
+		
+		stopTimesLoaded: function() {
+			this.currentCollection = 0;
+			this.render();
+		},
+		
+		prevTime: function() {
+			this.currentCollection = (this.currentCollection - 1).mod(this.collection.length);
+			this.render();
+		},
+		
+		nextTime: function() {
+			this.currentCollection = (this.currentCollection + 1).mod(this.collection.length);
+			this.render();
+		},
+	});
+	
 	var ContentView = Backbone.View.extend({
 		el: $("#content"),
 		
@@ -393,7 +458,7 @@ $(function(){
 			"findStop/intersection/": "findStopByIntersection",
 			"findStop/intersection/:intersection/:city/": "runStopSearchOnIntersection",
 			"findStop/:lat/:lng/": "runStopSearchOnLatLng",
-			"nextBus/:stop/:route/:direction": "nextBus"
+			"nextBus/:stop/:route/:direction/": "nextBus"
 		 },
 		
 		home: function() {
@@ -427,7 +492,9 @@ $(function(){
 		},
 		
 		nextBus: function(stop, route, direction) {
-			
+			var stopTimes = new Backbone.Collection;
+			stopTimes.url = '/api/stop_times/' + route + '/' + stop + '/';
+			App.ContentView.setSubView(new NextBusView({ collection: stopTimes, stop: stop, route: route }));
 		}
 	});
 	

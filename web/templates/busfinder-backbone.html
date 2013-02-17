@@ -96,5 +96,15 @@
 		</select>
 		<div id="routeInfo">Buses Found: <%= buses %> </div>
 	</script>
+	
+	<script type="text/template" id="stop-times-template">
+		<div style="text-align:center"><b>Bus <% if(busId) { %><%= busId %> <% } %><%= stopTimeMsg %></b></div>
+		
+		<div class="ui-grid-b">
+			<div class="ui-block-a"><button id="prev" type="button" data-theme="c" data-icon="arrow-l">Previous</button></div>
+			<div class="ui-block-b" style="text-align:center;"><p><%= curItem %> / <%= numItems %></p></div>
+			<div class="ui-block-b"><button id="next" type="button" data-theme="c" data-icon="arrow-r" data-iconpos="right">Next</button></div>	   
+		</div>
+	</script>
 </body>
 </html>
