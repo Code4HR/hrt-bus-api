@@ -385,7 +385,14 @@ $(function(){
 			'click #next': 'nextTime'
 		},
 		
+		busViews: [],
+		
 		initialize: function() {
+			this.buses = new Backbone.Collection;
+			this.buses.url = '/api/buses/on_route/' + this.options.route;
+			this.buses.on('reset', this.addBuses, this);
+			this.buses.fetch();
+			
 			this.collection.on('reset', this.stopTimesLoaded, this);
 			this.collection.fetch();
 		},
@@ -436,6 +443,27 @@ $(function(){
 			this.currentCollection = (this.currentCollection + 1).mod(this.collection.length);
 			this.render();
 		},
+		
+		addBus: function(bus) {
+			var busView = new BusView({model: bus});
+			busView.on('markerSelected', this.showBusDetails, this);
+			this.bounds.extend(busView.position);
+			this.busViews.push(busView);
+		},
+		
+		addBuses: function() {
+			while(this.busViews.length) {
+				this.busViews.pop().destroy();
+			}
+			
+			this.bounds = new google.maps.LatLngBounds();
+			this.buses.each(this.addBus, this);
+			
+			UserLocation && this.bounds.extend(UserLocation);
+			Map.fitBounds(this.bounds);
+			
+			this.render();
+		}
 	});
 	
 	var ContentView = Backbone.View.extend({
