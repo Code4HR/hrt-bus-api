@@ -1,7 +1,7 @@
 hrt-bus-api
 ===========
 
-Python scripts that transform and store HRT Bus Data and a Flask application that exposes the data through an RESTful API.
+Python scripts and Flask app that transform, store, and expose HRT Bus data through a RESTful API.
 
 demo site: http://lit-inlet-3610.herokuapp.com
 
