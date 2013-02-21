@@ -30,11 +30,11 @@ Options for Deploying
 ===========================
 ### Scripts
 
-* [Iron.io](http://www.iron.io/worker)
+* [Iron.io](http://www.iron.io/worker) - Each script has it's own README with instructions for deployment
 
 ### Flask Web Application
 
-* [Heroku](http://www.heroku.com/)
+* [Heroku](http://www.heroku.com/) - Check this [wiki page](https://github.com/brigade-hrva/hrt-bus-api/wiki/Deploying-To-Heroku)
 
 We're Here to Help
 =====================
