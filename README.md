@@ -13,6 +13,9 @@ Solution
 ===========================
 ### Transform and Store
 
+* [Process FTP](https://github.com/brigade-hrva/hrt-bus-api/tree/master/scripts/process-ftp) - Fetches the HRT FTP file and stores the data in MongoDB. Also attempts to set route number when it's missing.
+* [Process GTFS](https://github.com/brigade-hrva/hrt-bus-api/tree/master/scripts/process-gtfs) - Fetches the HRT GTFS package and stores the schedulded stop times for a single day in MongoDB.
+
 ### Expose
 
 Setup for Local Development (Mac or GNU/Linux)
