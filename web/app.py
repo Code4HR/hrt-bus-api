@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from geopy import geocoders
 import json
 import os
@@ -18,17 +18,13 @@ def beforeRequest():
 	collectionPrefix = curDateTime.strftime('%Y%m%d')
 
 @app.route('/')
-def hello():
-	return 'Hello World!'
+def index():
+    return redirect(url_for('busfinder'))
 
 @app.route('/busfinder/')
-def busFinder():
+@app.route('/busfinder/<path:view>/')
+def busfinder(view=None):
 	return render_template('busfinder.html')
-
-@app.route('/busfinder-backbone/')
-@app.route('/busfinder-backbone/<path:view>/')
-def busFinderBackboneView(view=None):
-	return render_template('busfinder-backbone.html')
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():
