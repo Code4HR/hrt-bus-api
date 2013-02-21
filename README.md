@@ -28,7 +28,10 @@ Setup for Local Development (Windows)
 
 Options for Deploying
 ===========================
-* Heroku
+### Scripts
+
+* [Iron.io](http://www.iron.io/worker)
+* [Heroku](http://www.heroku.com/)
 
 We're Here to Help
 =====================
