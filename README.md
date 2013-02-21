@@ -31,6 +31,9 @@ Options for Deploying
 ### Scripts
 
 * [Iron.io](http://www.iron.io/worker)
+
+### Flask Web Application
+
 * [Heroku](http://www.heroku.com/)
 
 We're Here to Help
