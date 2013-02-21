@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from geopy import geocoders
 import json
 import os
@@ -18,11 +18,12 @@ def beforeRequest():
 	collectionPrefix = curDateTime.strftime('%Y%m%d')
 
 @app.route('/')
-def hello():
-	return 'Hello World!'
+def index():
+    return redirect(url_for('busfinder'))
 
 @app.route('/busfinder/')
-def busFinder():
+@app.route('/busfinder/<path:view>/')
+def busfinder(view=None):
 	return render_template('busfinder.html')
 
 @app.route('/api/routes/active/')
@@ -38,7 +39,7 @@ def getActiveRoutes():
 def getBusesOnRoute(routeId):
 	# Get all checkins for the route, only keep the last one for each bus
 	checkins = {}
-	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time'):
+	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
 		checkins[checkin['busId']] = checkin
 	return json.dumps(checkins.values(), default=dthandler)
 	
@@ -56,14 +57,14 @@ def getStopsNearIntersection(city, intersection):
 
 @app.route('/api/stops/near/<lat>/<lng>/')
 def getStopsNear(lat, lng):
-	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(5)
+	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(6)
 	stops = list(stops)
 	
 	for stop in stops:
-		stop['inboundRoutes'] = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
-		stop['inboundRoutes'].sort()
-		stop['outboundRoutes'] = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
-		stop['outboundRoutes'].sort()
+		inboundRoutes =  db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
+		outboundRoutes = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
+		stop['inboundRoutes'] =  list(db['routes_' + collectionPrefix].find({'route_id': {'$in': inboundRoutes}}, fields={'_id': False}).sort('route_id'))
+		stop['outboundRoutes'] = list(db['routes_' + collectionPrefix].find({'route_id': {'$in': outboundRoutes}}, fields={'_id': False}).sort('route_id'))
 	return json.dumps(stops)
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
@@ -73,7 +74,8 @@ def getNextBus(routeId, stopId):
 	data = list(lastStop)
 	data += list(scheduledStops)
 	for stop in data:
-		checkins = db['checkins'].find({'tripId':stop['trip_id']}).sort('time', pymongo.DESCENDING)
+		stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+		checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
 		for checkin in checkins:
 			try:
 				stop['adherence'] = checkin['adherence']
