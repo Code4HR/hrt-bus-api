@@ -352,22 +352,30 @@ $(function(){
 				strokeOpacity: 1.0,
 				strokeWeight: 2
 			});
+			
+			if(this.detailsVisible) {
+				this.showDetails();
+			}
 		},
 		
 		markerSelected: function() {
 			this.trigger('markerSelected', this);
 		},
 		
+		detailsVisible: false,
+		
 		showDetails: function() {
-			this.infoWindow.open(Map, this.marker);
-			this.path.setMap(Map);
-			$.each(this.stopMarkers, function () { this.setMap(Map); });
+			this.infoWindow && this.infoWindow.open(Map, this.marker);
+			this.path && this.path.setMap(Map);
+			this.stopMarkers && $.each(this.stopMarkers, function () { this.setMap(Map); });
+			this.detailsVisible = true;
 		},
 		
 		hideDetails: function() {
-			this.infoWindow.close();
-			this.path.setMap(null);
-			$.each(this.stopMarkers, function () { this.setMap(null); });
+			this.detailsVisible = false;
+			this.infoWindow && this.infoWindow.close();
+			this.path && this.path.setMap(null);
+			this.stopMarkers && $.each(this.stopMarkers, function () { this.setMap(null); });
 		},
 	
 		destroy: function () {
@@ -422,6 +430,13 @@ $(function(){
 				if(!viewModel.busId) viewModel.busId = null;
 				
 				this.$el.html(this.template(viewModel));
+				
+				var busId = model.get('busId');
+				_.each(this.busViews, function(busView) {
+					if(busView.model.get('busId') == busId) {
+						this.showBusDetails(busView);
+					}
+				}, this);
 			} else {
 				this.$el.html('Loading...');
 			}
@@ -463,6 +478,14 @@ $(function(){
 			Map.fitBounds(this.bounds);
 			
 			this.render();
+		},
+		
+		showBusDetails: function(busView) {
+			this.selectedBus && this.selectedBus.hideDetails();
+			this.selectedBus = busView;
+			
+			Map.panTo(this.selectedBus.position);
+			this.selectedBus.showDetails();
 		}
 	});
 	
