@@ -6,16 +6,27 @@ $(function(){
 		return ((this%n)+n)%n;
 	};
 	
-	
 	// Create addHours function for Date object so we can
 	// easily get from GMT to EST (probably need to find a library for this)
 	Date.prototype.addHours = function(h){
 	    this.setHours(this.getHours()+h);
 	    return this;
 	}
-	Date.prototype.addMinutes = function(h){
-	    this.setMinutes(this.getMinutes()+h);
+	Date.prototype.addMinutes = function(m){
+	    this.setMinutes(this.getMinutes()+m);
 	    return this;
+	}
+	Date.parseUtc = function(input){
+	    var parts = input.match(/(\d+)/g);
+		// new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
+		return Date.UTC(parts[0], parts[1]-1, parts[2], parts[3], parts[4], parts[5]); // months are 0-based
+	}
+	
+	// parse a date in yyyy-mm-dd format
+	function parseDate(input) {
+	  var parts = input.match(/(\d+)/g);
+	  // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
+	  return new Date(parts[0], parts[1]-1, parts[2]); // months are 0-based
 	}
 	
 	// Global Map object
@@ -318,9 +329,9 @@ $(function(){
 			else if (adherence > 0) msg += adherence + ' minutes early';
 			else if (adherence == -1) msg += '1 minute late';
 			else msg += (adherence * -1) + ' minutes late';
-
-			var date = new Date(this.model.get('time')).addHours(-5);
-			var timePassed = new Date(new Date().getTime() - date).getMinutes();
+			
+			var date = new Date(Date.parseUtc(this.model.get('time')));
+			var timePassed = new Date(new Date().getTime() - date).getTime() / 1000 / 60 | 0;
 
 			msg += '<br>as of ';
 			if (timePassed == 0) msg += 'just now.';
@@ -408,21 +419,20 @@ $(function(){
 		render: function() {
 			if(this.collection && this.collection.length > 0) {
 				var model = this.collection.at(this.currentCollection);
-				var date = new Date(model.get('arrival_time'));
+				var date = new Date(Date.parseUtc(model.get('arrival_time')));
 				var adherence = model.get('adherence');
 				if(adherence) {
 					date = date.addMinutes(adherence);
 				}
 				
-				var now = new Date();
-				var stopTimeMinutesFromNow = (date.getTime() - now.getTime()) / 1000 / 60 | 0;
+				var stopTimeMinutesFromNow = new Date(new Date().getTime() - date).getTime() / 1000 / 60 | 0;
 				
 				var viewModel = model.toJSON();
 				
-				if(stopTimeMinutesFromNow < 0) {
-					viewModel.stopTimeMsg = 'left ' + (stopTimeMinutesFromNow * -1) + ' minutes ago';	
+				if(stopTimeMinutesFromNow > 0) {
+					viewModel.stopTimeMsg = 'left ' + stopTimeMinutesFromNow + ' minutes ago';	
 				} else {
-					viewModel.stopTimeMsg = 'arrives in ' + stopTimeMinutesFromNow + ' minutes';
+					viewModel.stopTimeMsg = 'arrives in ' + (stopTimeMinutesFromNow * -1) + ' minutes';
 				}
 				
 				viewModel.curItem = this.currentCollection + 1;
