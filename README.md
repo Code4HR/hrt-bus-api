@@ -16,11 +16,40 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
 * [RESTful API](https://github.com/brigade-hrva/hrt-bus-api/wiki/RESTful-API)
 * Bus Finder Web App
 
-## Setup for Local Development (Mac or GNU/Linux)
-* Step 1
+## Setup for Local Development
+1. Install Python 2
+2. Install [virtualenv](https://pypi.python.org/pypi/virtualenv)
+3. Clone this repo
+4. Create a virtual environment in the top level directory of the repo
 
-## Setup for Local Development (Windows)
-* Step 1
+    ```
+    $ virtualenv venv --distribute
+    ```
+    
+5. Activate the environment
+
+    ```
+    $ source venv/bin/activate
+    ```
+    
+6. Install dependencies
+
+    ```
+    $ pip install -r requirements.txt
+    ```
+    
+7. Set MongoDB URI
+
+    ```
+    $ export MONGO_URI=mongodb://hrt_web_app:cfa@ds045897.mongolab.com:45897/hrt
+    ```
+    
+8. Change to the web directory and run the flask app
+
+    ```
+    $ cd web
+    $ python app.py 
+    ```
 
 ## Deployment
 
