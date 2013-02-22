@@ -17,7 +17,7 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
 * Bus Finder Web App
 
 ## Setup for Local Development
-1. Install Python 2
+1. Install [Python 2](http://wiki.python.org/moin/BeginnersGuide/Download)
 2. Install [virtualenv](https://pypi.python.org/pypi/virtualenv)
 3. Clone this repo
 4. Create a virtual environment in the top level directory of the repo
