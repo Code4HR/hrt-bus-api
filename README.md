@@ -18,11 +18,7 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
     * Bus Finder
 
 ## Setup for Local Development
-If you would like to develop the scripts, you will need your own MongoDB instance. I recommend [MongoLab](https://mongolab.com/welcome/). If you just want to work on the web app, feel free to skip the part about the scripts. Read-only access is provided to a MongoDB instance that is being populated with real-time bus data.
 
-### Scripts
-
-### Web App
 1. Install [Python 2](http://wiki.python.org/moin/BeginnersGuide/Download)
 2. Install [virtualenv](https://pypi.python.org/pypi/virtualenv)
 3. Clone this repo
@@ -43,21 +39,26 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
     ```
     $ pip install -r requirements.txt
     ```
-    
-7. Set MongoDB URI (substitue your own MongoDB instance if you have one)
+
+### Scripts
+If you would like to develop the scripts, you will need your own MongoDB instance. I recommend [MongoLab](https://mongolab.com/welcome/). If you just want to work on the web app, feel free to skip the part about the scripts. Read-only access is provided to a MongoDB instance that is being populated with real-time bus data.
+
+### Web App
+
+1. Set MongoDB URI (substitue your own MongoDB instance if you have one)
 
     ```
     $ export MONGO_URI=mongodb://hrt_web_app:cfa@ds045897.mongolab.com:45897/hrt
     ```
     
-8. Change to the web directory and run the flask app
+2. Change to the web directory and run the flask app
 
     ```
     $ cd web
     $ python app.py 
     ```
     
-9. Browse to `http://0.0.0.0:5000/`
+3. Browse to `http://0.0.0.0:5000/`
 
 ## Deployment
 
