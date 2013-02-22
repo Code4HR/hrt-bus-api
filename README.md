@@ -8,11 +8,11 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
 
 ## Solution
 
-### Transform and Store Data
+### Transform and Store Data - Python Scripts
 * [Process FTP](https://github.com/brigade-hrva/hrt-bus-api/tree/master/scripts/process-ftp) - Fetches the HRT FTP file and stores the data in MongoDB. Also attempts to set route number when it's missing.
 * [Process GTFS](https://github.com/brigade-hrva/hrt-bus-api/tree/master/scripts/process-gtfs) - Fetches the HRT GTFS package and stores the schedulded stop times for a single day in MongoDB.
 
-### Expose Data
+### Expose Data - Python Flask
 * [RESTful API](https://github.com/brigade-hrva/hrt-bus-api/wiki/RESTful-API)
 * Bus Finder Web App
 
@@ -50,6 +50,8 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
     $ cd web
     $ python app.py 
     ```
+    
+9. Browse to `http://0.0.0.0:5000/`
 
 ## Deployment
 
