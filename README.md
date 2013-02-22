@@ -16,6 +16,8 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
 * Web App
     * [RESTful API](https://github.com/brigade-hrva/hrt-bus-api/wiki/RESTful-API)
     * Bus Finder
+    
+      ![Bus Finder](https://raw.github.com/bschoenfeld/hrt-bus-api/master/screenshot.png "Bus Finder")
 
 ## Setup for Local Development
 
