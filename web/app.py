@@ -114,6 +114,10 @@ def vehiclePosition():
 		return  text_format.MessageToString(feed)
 	return feed.SerializeToString()
 
+@app.route('/api/')
+def getApiInfo():
+	return json.dumps({'version': '1.0', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+
 @app.route('/api/routes/active/')
 def getActiveRoutes():
 	# List the routes from the checkins
