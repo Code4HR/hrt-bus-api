@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from geopy import geocoders
+from google.protobuf import text_format
 import json
 import os
 import pymongo
+import gtfs_realtime_pb2
 
 app = Flask(__name__)
 db = pymongo.Connection(os.environ['MONGO_URI']).hrt
@@ -25,6 +27,59 @@ def index():
 @app.route('/busfinder/<path:view>/')
 def busfinder(view=None):
 	return render_template('busfinder.html')
+	
+@app.route('/gtfs/trip_update/')
+def tripUpdate():
+	# PROTOCAL BUFFER!!!  https://developers.google.com/protocol-buffers/docs/pythontutorial
+	
+	# Create feed
+	feed = gtfs_realtime_pb2.FeedMessage()
+	
+	# header
+	feed.header.gtfs_realtime_version = '1.0'
+	feed.header.timestamp = long((datetime.utcnow() - datetime(1970,1,1)).total_seconds())
+	
+	# create an entity for each active trip id
+	activeTrips = db['checkins'].aggregate([{ "$match": 
+												{ "tripId": { '$ne': None }, 
+												  "adherence": { '$exists': True } } },
+											{ "$group":
+												{ "_id": { "trip": "$tripId", "bus": "$busId", "seq": "$lastStopSequence" },
+												  "time": { "$last": "$time" },
+												  "adherence": { "$last": "$adherence" } } },
+											{ "$sort": { "_id.seq": 1 } },
+											{ "$group":
+												{ "_id": { "trip": "$_id.trip", "bus": "$_id.bus" },
+												  "time": { "$last": "$time" },
+												  "timeChecks" : 
+													{ "$push" :
+														{ "seq": "$_id.seq",
+													  	  "time" : "$time",
+													  	  "adherence":  "$adherence" } } } } ])
+	#return json.dumps(activeTrips, default=dthandler)
+	
+	for trip in activeTrips['result']:
+		# add the trip entity
+		entity = feed.entity.add()
+		entity.id = 'trip' + trip['_id']['trip']
+		entity.trip_update.trip.trip_id = trip['_id']['trip']
+		entity.trip_update.vehicle.id = str(trip['_id']['bus'])
+		entity.trip_update.vehicle.label = str(trip['_id']['bus'])
+		entity.trip_update.timestamp = long((trip['time'] - datetime(1970,1,1)).total_seconds())
+		
+		# add the stop time updates
+		for update in trip['timeChecks']:
+			stopTime = entity.trip_update.stop_time_update.add()
+			stopTime.stop_sequence = update['seq']
+			stopTime.arrival.delay = update['adherence'] * -60 # convert minutes to seconds
+	
+	if request.args.get('debug'):
+		return  text_format.MessageToString(feed)
+	return feed.SerializeToString()
+
+@app.route('/gtfs/vehicle_position/')
+def vehiclePosition():
+	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():
