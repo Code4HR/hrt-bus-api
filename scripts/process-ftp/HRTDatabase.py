@@ -10,7 +10,7 @@ class HRTDatabase:
 	def getBusRouteMappings(self):
 		mappings = {} 
 		for mapping in self.database['busRouteMappings'].find():
-			if mapping['time'] > datetime.utcnow() + timedelta(hours=-5, minutes=-30):
+			if mapping['time'] > datetime.utcnow() + timedelta(minutes=-30):
 				mappings[mapping['busId']] = mapping
 		return mappings
 	
@@ -28,12 +28,12 @@ class HRTDatabase:
 		return None
 	
 	def updateCheckins(self, checkins):
-		# purge checkins that are more than 30 minutes old
-		self.database['checkins'].remove({"time": {"$lt": datetime.utcnow() + timedelta(minutes=-30)}})
+		# purge checkins that are more than 2 hours
+		self.database['checkins'].remove({"time": {"$lt": datetime.utcnow() + timedelta(hours=-2)}})
 		if len(checkins) > 0:
 			self.database['checkins'].insert(checkins)
 	
-	def getTripId(self, checkin):
+	def getScheduledStop(self, checkin):
 		checkinLocalTime = checkin.time + timedelta(hours=-5)
 		collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
 		scheduledStop = self.database[collectionName].find_one({
@@ -41,13 +41,13 @@ class HRTDatabase:
 																"stop_id": checkin.stopId, 
 																"direction_id": checkin.direction,
 																"arrival_time": {
-																	"$gte": checkin.time + timedelta(minutes=checkin.adherence - 1),
-																	"$lte": checkin.time + timedelta(minutes=checkin.adherence + 1)
+																	"$gte": checkin.time + timedelta(minutes=checkin.adherence - 2),
+																	"$lte": checkin.time + timedelta(minutes=checkin.adherence + 2)
 																}})
 		if scheduledStop is None:
 			print "No scheduled stop found for the following checkin in {0}".format(collectionName)
 			print checkin.__dict__
 			return None
-		return scheduledStop['trip_id']
+		return scheduledStop
 	
 

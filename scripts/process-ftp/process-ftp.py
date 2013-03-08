@@ -30,22 +30,29 @@ def process(text):
 	
 	if hasattr(checkin, 'routeId'):
 		checkin.tripId = None
+		checkin.lastStopSequence = None
 		if hasattr(checkin, 'adherence'):
-			checkin.tripId = db.getTripId(checkin)
-			if checkin.tripId is not None:
+			scheduledStop = db.getScheduledStop(checkin)
+			if scheduledStop is not None:
 				stats['foundTrip'] += 1
+				checkin.tripId = scheduledStop['trip_id']
+				checkin.lastStopSequence = scheduledStop['stop_sequence']
+				checkin.scheduleMatch = True
 		if checkin.tripId is None and checkin.busId in busRouteMappings:
 			checkin.tripId = busRouteMappings[checkin.busId]['tripId']
+			checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
 		busRouteMappings[checkin.busId] = {	'busId': checkin.busId,
 											'routeId' : checkin.routeId,
 											'direction': checkin.direction, 
 											'tripId': checkin.tripId, 
+											'lastStopSequence': checkin.lastStopSequence,
 											'time': checkin.time }
 		stats['hadRoute'] += 1
 	elif checkin.busId in busRouteMappings:
 		checkin.routeId = busRouteMappings[checkin.busId]['routeId']
 		checkin.direction = busRouteMappings[checkin.busId]['direction']
 		checkin.tripId = busRouteMappings[checkin.busId]['tripId']
+		checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
 		stats['foundRoute'] += 1
 	checkinDocs.append(checkin.__dict__)
 
