@@ -79,7 +79,40 @@ def tripUpdate():
 
 @app.route('/gtfs/vehicle_position/')
 def vehiclePosition():
-	return json.dumps(list(activeRoutesWithDetails))
+	# PROTOCAL BUFFER!!!  https://developers.google.com/protocol-buffers/docs/pythontutorial
+	
+	# Create feed
+	feed = gtfs_realtime_pb2.FeedMessage()
+	
+	# header
+	feed.header.gtfs_realtime_version = '1.0'
+	feed.header.timestamp = long((datetime.utcnow() - datetime(1970,1,1)).total_seconds())
+	
+	# create an entity for each active trip id
+	lastBusLocations = db['checkins'].aggregate([{ "$match": 
+														{ "tripId": { '$ne': None }, 
+												  	  	  "location": { '$exists': True } } },
+												 { "$group":
+												 		{ "_id": { "bus": "$busId" },
+												   		  "trip": { "$last": "$tripId" },
+												   		  "time": { "$last": "$time" },
+												   		  "location": { "$last": "$location" } } } ])
+	#return json.dumps(lastLocations, default=dthandler)
+	
+	for bus in lastBusLocations['result']:
+		# add the trip entity
+		entity = feed.entity.add()
+		entity.id = 'bus' + str(bus['_id']['bus'])
+		entity.vehicle.trip.trip_id = bus['trip']
+		entity.vehicle.vehicle.id = str(bus['_id']['bus'])
+		entity.vehicle.vehicle.label = str(bus['_id']['bus'])
+		entity.vehicle.position.longitude = float(bus['location'][0])
+		entity.vehicle.position.latitude = float(bus['location'][1])
+		entity.vehicle.timestamp = long((bus['time'] - datetime(1970,1,1)).total_seconds())
+	
+	if request.args.get('debug'):
+		return  text_format.MessageToString(feed)
+	return feed.SerializeToString()
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():
