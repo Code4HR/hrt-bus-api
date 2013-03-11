@@ -8,14 +8,19 @@ import pymongo
 import gtfs_realtime_pb2
 
 app = Flask(__name__)
-db = pymongo.Connection(os.environ['MONGO_URI']).hrt
 dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 
-curDateTime  = datetime.utcnow() + timedelta(hours=-5)
-collectionPrefix = curDateTime.strftime('%Y%m%d')
+db = None
+curDateTime = None
+collectionPrefix = None
 
 @app.before_request
 def beforeRequest():
+	global db
+	global curDateTime
+	global collectionPrefix
+	
+	db = pymongo.Connection(os.environ['MONGO_URI']).hrt
 	curDateTime  = datetime.utcnow() + timedelta(hours=-5)
 	collectionPrefix = curDateTime.strftime('%Y%m%d')
 
@@ -113,6 +118,10 @@ def vehiclePosition():
 	if request.args.get('debug'):
 		return  text_format.MessageToString(feed)
 	return feed.SerializeToString()
+
+@app.route('/api/')
+def getApiInfo():
+	return json.dumps({'version': '1.0', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 def getActiveRoutes():
