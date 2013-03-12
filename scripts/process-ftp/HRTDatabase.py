@@ -50,7 +50,7 @@ class HRTDatabase:
 		# get the stop sequence that OneBusAway uses
 		scheduledStop['stop_sequence_OBA'] = self.database[collectionName].find({
 													"trip_id": scheduledStop["trip_id"],
-													"stop_sequence": {"$lte": scheduledStop["stop_sequence"]}}).count()
+													"stop_sequence": {"$lt": scheduledStop["stop_sequence"]}}).count()
 		
 		return scheduledStop
 	
