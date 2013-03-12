@@ -50,15 +50,18 @@ def tripUpdate():
 												  "adherence": { '$exists': True }, 
 												  "lastStopSequence": { '$exists': True }, 
 												  "lastStopSequenceOBA": { '$exists': True } } },
+											{ "$sort": { "time": 1 } },
 											{ "$group":
-												{ "_id": { "trip": "$tripId", "bus": "$busId", "seq": "$lastStopSequence" },
+												{ "_id": { "trip": "$tripId", "seq": "$lastStopSequence" },
 												  "time": { "$last": "$time" },
+												  "bus": { "$last": "$busId" },
 												  "adherence": { "$last": "$adherence" },
 												  "seqOBA": { "$last": "$lastStopSequenceOBA" } } },
 											{ "$sort": { "_id.seq": 1 } },
 											{ "$group":
-												{ "_id": { "trip": "$_id.trip", "bus": "$_id.bus" },
+												{ "_id": { "trip": "$_id.trip" },
 												  "time": { "$last": "$time" },
+												  "bus": { "$last": "$bus" },
 												  "timeChecks" : 
 													{ "$push" :
 														{ "seq": "$_id.seq",
@@ -72,8 +75,8 @@ def tripUpdate():
 		entity = feed.entity.add()
 		entity.id = 'trip' + trip['_id']['trip']
 		entity.trip_update.trip.trip_id = trip['_id']['trip']
-		entity.trip_update.vehicle.id = str(trip['_id']['bus'])
-		entity.trip_update.vehicle.label = str(trip['_id']['bus'])
+		entity.trip_update.vehicle.id = str(trip['bus'])
+		entity.trip_update.vehicle.label = str(trip['bus'])
 		entity.trip_update.timestamp = long((trip['time'] - datetime(1970,1,1)).total_seconds())
 		
 		# add the stop time updates
