@@ -47,11 +47,14 @@ def tripUpdate():
 	# create an entity for each active trip id
 	activeTrips = db['checkins'].aggregate([{ "$match": 
 												{ "tripId": { '$ne': None }, 
-												  "adherence": { '$exists': True } } },
+												  "adherence": { '$exists': True }, 
+												  "lastStopSequence": { '$exists': True }, 
+												  "lastStopSequenceOBA": { '$exists': True } } },
 											{ "$group":
 												{ "_id": { "trip": "$tripId", "bus": "$busId", "seq": "$lastStopSequence" },
 												  "time": { "$last": "$time" },
-												  "adherence": { "$last": "$adherence" } } },
+												  "adherence": { "$last": "$adherence" },
+												  "seqOBA": { "$last": "$lastStopSequenceOBA" } } },
 											{ "$sort": { "_id.seq": 1 } },
 											{ "$group":
 												{ "_id": { "trip": "$_id.trip", "bus": "$_id.bus" },
@@ -60,7 +63,8 @@ def tripUpdate():
 													{ "$push" :
 														{ "seq": "$_id.seq",
 													  	  "time" : "$time",
-													  	  "adherence":  "$adherence" } } } } ])
+													  	  "adherence":  "$adherence",
+													  	  "seqOBA":  "$seqOBA" } } } } ])
 	#return json.dumps(activeTrips, default=dthandler)
 	
 	for trip in activeTrips['result']:
@@ -75,7 +79,7 @@ def tripUpdate():
 		# add the stop time updates
 		for update in trip['timeChecks']:
 			stopTime = entity.trip_update.stop_time_update.add()
-			stopTime.stop_sequence = update['seq']
+			stopTime.stop_sequence = update['seq'] if not request.args.get('oba') else update['seqOBA']
 			stopTime.arrival.delay = update['adherence'] * -60 # convert minutes to seconds
 	
 	if request.args.get('debug'):
