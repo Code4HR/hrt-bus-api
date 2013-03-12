@@ -36,18 +36,22 @@ class HRTDatabase:
 	def getScheduledStop(self, checkin):
 		checkinLocalTime = checkin.time + timedelta(hours=-5)
 		collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
-		scheduledStop = self.database[collectionName].find_one({
-																"route_id" : checkin.routeId, 
-																"stop_id": checkin.stopId, 
-																"direction_id": checkin.direction,
-																"arrival_time": {
-																	"$gte": checkin.time + timedelta(minutes=checkin.adherence - 2),
-																	"$lte": checkin.time + timedelta(minutes=checkin.adherence + 2)
-																}})
+		scheduledStop = self.database[collectionName].find_one({ 
+										"route_id" : checkin.routeId,
+										"stop_id": checkin.stopId,
+										"direction_id": checkin.direction,
+										"arrival_time": { "$gte": checkin.time + timedelta(minutes=checkin.adherence - 2),
+														  "$lte": checkin.time + timedelta(minutes=checkin.adherence + 2) }})
 		if scheduledStop is None:
 			print "No scheduled stop found for the following checkin in {0}".format(collectionName)
 			print checkin.__dict__
 			return None
+			
+		# get the stop sequence that OneBusAway uses
+		scheduledStop['stop_sequence_OBA'] = self.database[collectionName].find({
+													"trip_id": scheduledStop["trip_id"],
+													"stop_sequence": {"$lte": scheduledStop["stop_sequence"]}}).count()
+		
 		return scheduledStop
 	
 
