@@ -95,6 +95,25 @@ $(function(){
 		}
 	});
 	
+	var AboutView = Backbone.View.extend({
+		template: _.template($('#about-template').html()),
+		
+		tagName: 'p',
+		
+		events: {
+			'click #home': 'goHome'
+		},
+		
+		render: function() {
+			this.$el.html(this.template()).css('text-align', 'center');
+			return this;
+		},
+		
+		goHome: function() {
+			App.Router.navigate('/', {trigger: true});
+		}
+	});
+	
 	var StopSearchView = Backbone.View.extend({
 		template: _.template($('#begin-stop-search-template').html()),
 		
@@ -514,6 +533,7 @@ $(function(){
 	var Router = Backbone.Router.extend({
 		 routes: {
 			"": "home",
+			"about/": "about",
 			"routes/(:route/)": "busRoutes",
 			"findStop/": "findStop",
 			"findStop/intersection/": "findStopByIntersection",
@@ -524,6 +544,10 @@ $(function(){
 		
 		home: function() {
 			App.ContentView.setSubView(new HomeView);
+		},
+		
+		about: function() {
+			App.ContentView.setSubView(new AboutView);
 		},
 		
 		busRoutes: function(route) {
