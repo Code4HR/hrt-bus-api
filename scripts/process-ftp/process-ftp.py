@@ -62,7 +62,7 @@ def process(text):
 	checkinDocs.append(checkin.__dict__)
 
 c = config.load()
-db = HRTDatabase(c["db_uri"])
+db = HRTDatabase(c["db_uri"], c["db_name"])
 curTime = datetime.utcnow() + timedelta(hours=-5)
 
 busRouteMappings = db.getBusRouteMappings()

@@ -1,10 +1,11 @@
+import pytz
 from datetime import datetime, timedelta
 from pymongo import Connection
 
 class HRTDatabase:
-	def __init__(self, uri):
+	def __init__(self, uri, db):
 		self.client = Connection(uri)
-		self.database = self.client.hrt
+		self.database = self.client[db]
 	
 	# get bus route mappings that are not more than 30 minutes old
 	def getBusRouteMappings(self):
@@ -24,7 +25,7 @@ class HRTDatabase:
 		if self.database['checkins'].find().count() > 0:
 			lastTime = self.database['checkins'].find().sort("$natural", -1)[0]["time"]
 			lastBuses = self.database['checkins'].find({"time" : lastTime}).distinct("busId")
-			return {"time": lastTime, "busIds": lastBuses}
+			return {"time": lastTime.replace(tzinfo=pytz.UTC), "busIds": lastBuses}
 		return None
 	
 	def updateCheckins(self, checkins):

@@ -1,5 +1,6 @@
 import config
 import json
+import pytz
 import sys
 from StringIO import StringIO
 from urllib import urlopen
@@ -8,10 +9,18 @@ from csv import DictReader
 from datetime import datetime, time, timedelta
 from HRTDatabase import HRTDatabase
 
+eastern = pytz.timezone('US/Eastern')
+
+def estNow():
+	return datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(eastern)
+
+now = estNow()
+print 'Running at ' + str(now)
+
 c = config.load()
-db = HRTDatabase(c["db_uri"])
+db = HRTDatabase(c["db_uri"], c["db_name"])
 if len(sys.argv) != 2:
-	db.removeOldGTFS(datetime.utcnow() + timedelta(hours=-5))
+	db.removeOldGTFS(now)
 
 feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
 fileUrl = json.loads(urlopen(feedUrl).read())['data']['datafiles'][0]['file_url']
@@ -21,7 +30,7 @@ daysFromNow = 1
 if len(sys.argv) == 2:
 	daysFromNow = int(sys.argv[1])
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-curDate = (datetime.utcnow() + timedelta(days=daysFromNow, hours=-5)).date()
+curDate = (now + timedelta(days=daysFromNow)).date()
 midnight = datetime.combine(curDate, time.min)
 curWeekDay = days[curDate.weekday()]
 print curWeekDay + " " + str(curDate)
@@ -55,10 +64,14 @@ for row in stopTimes:
 			row['stop_sequence'] = int(row['stop_sequence'])
 			
 			arriveTime = row['arrival_time'].split(':')
-			row['arrival_time'] = midnight + timedelta(hours=int(arriveTime[0])+5, minutes=int(arriveTime[1]))
+			naiveArriveTime = midnight + timedelta(hours=int(arriveTime[0]), minutes=int(arriveTime[1]))
+			localArriveTime = eastern.localize(naiveArriveTime, is_dst=None)
+			row['arrival_time'] = localArriveTime.astimezone(pytz.utc)
 			
 			departTime = row['departure_time'].split(':')
-			row['departure_time'] = midnight + timedelta(hours=int(departTime[0])+5, minutes=int(departTime[1]))
+			naiveDeptTime = midnight + timedelta(hours=int(departTime[0]), minutes=int(departTime[1]))
+			localDeptTime = eastern.localize(naiveDeptTime, is_dst=None)
+			row['departure_time'] = localDeptTime.astimezone(pytz.utc)
 			
 			activeStopTimes.append(row)
 		except ValueError:
