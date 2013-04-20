@@ -1,6 +1,9 @@
 runtime 'python'
 exec "process-ftp.py"
 
+pip "pymongo"
+pip "pytz"
+
 file "HRTBus.py"
 file "HRTDatabase.py"
 file "config.py"
