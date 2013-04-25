@@ -36,6 +36,10 @@ HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrt
     ```
     $ source venv/bin/activate
     ```
+    -OR-  for Windows
+    ```
+    $ venv\Scripts\activate.bat
+    ```    
     
 6. Install dependencies
 
@@ -53,7 +57,10 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
     ```
     $ export MONGO_URI=mongodb://hrt_web_app:cfa@ds045897.mongolab.com:45897/hrt
     ```
-    
+    -OR-  for Windows
+    ```
+    $ set MONGO_URI=mongodb://hrt_web_app:cfa@ds045897.mongolab.com:45897/hrt
+    ```
 2. Change to the web directory and run the flask app
 
     ```
@@ -69,7 +76,7 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
 * [Iron.io](http://www.iron.io/worker) - Each script has it's own README with instructions for deployment
 
 ### Flask Web Application
-* [Heroku](http://www.heroku.com/) - Check this [wiki page](https://github.com/brigade-hrva/hrt-bus-api/wiki/Deploying-To-Heroku)
+* [Heroku](http://www.heroku.com/) - Deploy to Heroku
 
 ## We're Here to Help
 * Ben Schoenfeld - ben.schoenfeld@gmail.com - [@oilytheotter](http://twitter.com/oilytheotter)
