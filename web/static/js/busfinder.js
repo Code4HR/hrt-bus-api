@@ -321,12 +321,21 @@ $(function(){
 		createMarker: function () {
 			this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
 
+			var icon;
+
+			if (this.model.get('direction') === 0) {
+				icon = '/static/img/bus-outbound.png';
+
+			} else {
+				icon = '/static/img/bus-inbound.png';
+			}
+
 			this.marker = new google.maps.Marker({
 				position: this.position,
 				map: Map,
 				animation: google.maps.Animation.DROP,
 				title: 'Bus ' + this.model.busId,
-				icon: '/static/img/bus.png'
+				icon: icon
 			});
 
 			this.infoWindow = new google.maps.InfoWindow({ 
