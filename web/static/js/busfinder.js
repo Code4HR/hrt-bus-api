@@ -307,7 +307,54 @@ $(function(){
 			this.selectedBus.showDetails();
 		}
 	});
-	
+
+	var BusParkView = Backbone.View.extend({
+		initialize: function () {
+			_.bindAll(this);
+			/*
+			this.collection = new Backbone.Collection;
+			this.collection.url = '/api/busparks/';
+			this.collection.on('reset', this.createPath, this);
+			this.collection.fetch();
+			*/
+
+			var LatLng = google.maps.LatLng;
+
+			this.polygon = new google.maps.Polygon({
+				map: Map,
+				fillColor: 'DarkOrchid',
+				strokeColor: 'DeepPink',
+				strokeWeight: 1,
+				paths: [
+					[
+						new LatLng(36.86503, -76.28412),
+						new LatLng(36.86363, -76.28431),
+						new LatLng(36.86381, -76.27974),
+						new LatLng(36.86527, -76.28019)
+					],
+					[
+						new LatLng(37.01356, -76.36571),
+						new LatLng(37.01210, -76.36551),
+						new LatLng(37.01222, -76.36404),
+						new LatLng(37.01433, -76.36412)
+					]
+				]
+			});
+		},
+
+		contains: function (bus) {
+			return google.maps.geometry.poly.containsLocation(
+					bus.position,
+					this.polygon
+				);
+		},
+
+		destroy: function () {
+			this.polygon.setMap(null);
+			this.remove();
+	    }
+	});
+
 	var BusView = Backbone.View.extend({
 		initialize: function() {
 			_.bindAll(this);
@@ -315,12 +362,15 @@ $(function(){
 			this.collection.url = '/api/buses/history/' + this.model.get('busId');
 			this.collection.on('reset', this.createPath, this);
 			this.collection.fetch();
-			this.createMarker();
+			this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
+
+			// don't display marker if in the bus park
+			if (!busPark.contains(this)) {
+				this.createMarker();
+			}
 		},
 		
 		createMarker: function () {
-			this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
-
 			var icon;
 
 			if (this.model.get('direction') === 0) {
@@ -591,7 +641,9 @@ $(function(){
 			App.ContentView.setSubView(new NextBusView({ collection: stopTimes, stop: stop, route: route }));
 		}
 	});
-	
+
+	var busPark = new BusParkView();
+
 	var App = {
 		MapView: new MapView,
 		ContentView: new ContentView,
