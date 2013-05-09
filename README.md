@@ -76,7 +76,7 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
 * [Iron.io](http://www.iron.io/worker) - Each script has it's own README with instructions for deployment
 
 ### Flask Web Application
-* [Heroku](http://www.heroku.com/) - Deploy to Heroku
+* [Heroku](http://www.heroku.com/) - Check this [wiki page](https://github.com/c4hrva/hrt-bus-api/wiki/Deploying-To-Heroku)
 
 ## We're Here to Help
 * Ben Schoenfeld - ben.schoenfeld@gmail.com - [@oilytheotter](http://twitter.com/oilytheotter)
