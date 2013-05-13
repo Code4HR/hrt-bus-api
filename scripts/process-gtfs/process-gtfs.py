@@ -104,3 +104,11 @@ for row in routesReader:
         pass
 print str(len(routes)) + " routes"
 db.insertRoutes(routes, curDate)
+
+print "Generating Destinations Collection"
+destinations = []
+for trip in db.getFinalStops(curDate):
+	destinations.append({ 'tripId': trip['_id'],
+						  'stopName': db.getStopName(trip['stopId'], curDate) })
+print str(len(destinations)) + " destinations"
+db.insertDestinations(destinations, curDate)
