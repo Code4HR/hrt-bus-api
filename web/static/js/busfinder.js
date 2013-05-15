@@ -450,7 +450,8 @@ $(function(){
 				var date = new Date(Date.parseUtc(model.get('arrival_time')));
 				var adherence = model.get('adherence');
 				if(adherence) {
-					date = date.addMinutes(adherence);
+					// Positive adherence means the bus is early
+					date = date.addMinutes(adherence * -1);
 				}
 				
 				var stopTimeMinutesFromNow = new Date(new Date().getTime() - date).getTime() / 1000 / 60 | 0;
