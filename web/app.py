@@ -13,6 +13,17 @@ dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 db = None
 curDateTime = None
 collectionPrefix = None
+busParkJsonString = '[]'
+
+# load bus park data
+try:
+	busParkJsonString = json.dumps(json.load(open('static/data/bus_parks.js')))
+
+except IOError as e:
+	print 'Error Opening Bus Park File:', e
+
+except ValueError as e:
+	print 'Bus Park File JSON Format Error:', e
 
 @app.before_request
 def beforeRequest():
@@ -187,6 +198,10 @@ def getNextBus(routeId, stopId):
 			except KeyError:
 				pass
 	return json.dumps(data, default=dthandler)
+
+@app.route('/api/bus_parks/')
+def getBusParks():
+	return busParkJsonString
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
