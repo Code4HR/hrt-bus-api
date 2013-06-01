@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from flask import Flask, Response, render_template, redirect, url_for, request
+from flask import Flask, Response, render_template, redirect, url_for, request, current_app
+from functools import wraps
 from geopy import geocoders
 from google.protobuf import text_format
 import json
@@ -13,6 +14,18 @@ dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 db = None
 curDateTime = None
 collectionPrefix = None
+
+def support_jsonp(f):
+    """Wraps JSONified output for JSONP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            content = str(callback) + '(' + str(f()) + ')'
+            return current_app.response_class(content, mimetype='application/json')
+        else:
+            return Response(f(), mimetype='application/json')
+    return decorated_function
 
 @app.before_request
 def beforeRequest():
@@ -127,42 +140,44 @@ def vehiclePosition():
 	return feed.SerializeToString()
 
 @app.route('/api/')
+@support_jsonp
 def getApiInfo():
-	response = json.dumps({'version': '1.0', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
-	return Response(response, mimetype='application/json')
+	return json.dumps({'version': '1.0', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
+@support_jsonp
 def getActiveRoutes():
 	# List the routes from the checkins
 	activeRoutes = db['checkins'].find({'location': {'$exists': True}}).distinct('routeId')
 	
 	# Get details about those routes from the GTFS data
 	activeRoutesWithDetails = db['routes_' + collectionPrefix].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
-	response = json.dumps(list(activeRoutesWithDetails))
-	return Response(response, mimetype='application/json')
+	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/buses/on_route/<int:routeId>/')
+@support_jsonp
 def getBusesOnRoute(routeId):
 	# Get all checkins for the route, only keep the last one for each bus
 	checkins = {}
 	for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
 		checkins[checkin['busId']] = checkin
-	response = json.dumps(checkins.values(), default=dthandler)
-	return Response(response, mimetype='application/json')
+	return json.dumps(checkins.values(), default=dthandler)
 	
 @app.route('/api/buses/history/<int:busId>/')
+@support_jsonp
 def getBusHistory(busId):
 	# Get all checkins for a bus
 	checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
-	response = json.dumps(list(checkins), default=dthandler)
-	return Response(response, mimetype='application/json')
+	return json.dumps(list(checkins), default=dthandler)
 
 @app.route('/api/stops/near/intersection/<city>/<intersection>/')
+@support_jsonp
 def getStopsNearIntersection(city, intersection):
 	place, (lat, lng) = geocoders.googlev3.GoogleV3().geocode("{0}, {1}, VA".format(intersection, city), exactly_one=False)[0]
 	return getStopsNear(lat, lng)
 
 @app.route('/api/stops/near/<lat>/<lng>/')
+@support_jsonp
 def getStopsNear(lat, lng):
 	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(6)
 	stops = list(stops)
@@ -172,10 +187,10 @@ def getStopsNear(lat, lng):
 		outboundRoutes = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
 		stop['inboundRoutes'] =  list(db['routes_' + collectionPrefix].find({'route_id': {'$in': inboundRoutes}}, fields={'_id': False}).sort('route_id'))
 		stop['outboundRoutes'] = list(db['routes_' + collectionPrefix].find({'route_id': {'$in': outboundRoutes}}, fields={'_id': False}).sort('route_id'))
-	response = json.dumps(stops)
-	return Response(response, mimetype='application/json')
+	return json.dumps(stops)
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
+@support_jsonp
 def getNextBus(routeId, stopId):
 	scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
 	lastStop = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$lt': datetime.utcnow()}}).sort('arrival_time', pymongo.DESCENDING).limit(1)
@@ -191,8 +206,7 @@ def getNextBus(routeId, stopId):
 				break
 			except KeyError:
 				pass
-	response = json.dumps(data, default=dthandler)
-	return Response(response, mimetype='application/json')
+	return json.dumps(data, default=dthandler)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
