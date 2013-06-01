@@ -208,6 +208,27 @@ def getNextBus(routeId, stopId):
 				pass
 	return json.dumps(data, default=dthandler)
 
+@app.route('/api/stop_times/<int:stopId>/')
+@support_jsonp
+def getBusesAtStop(stopId):
+	scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId, 
+														   		'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
+																			 	  '$lte': datetime.utcnow() + timedelta(minutes=30) } }).sort('arrival_time'))
+	for stop in scheduledStops:
+		stop['destination'] = db['destinations_' + collectionPrefix].find_one({ 'tripId': stop['trip_id'] })['stopName']
+		stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+		checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
+		for checkin in checkins:
+			try:
+				stop['adherence'] = checkin['adherence']
+				stop['busId'] = checkin['busId']
+				break
+			except KeyError:
+				pass
+		stop.pop('_id')
+		stop.pop('all_trip_ids')
+	return json.dumps(scheduledStops, default=dthandler)
+
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
