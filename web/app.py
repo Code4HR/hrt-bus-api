@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, Response, render_template, redirect, url_for, request, current_app
+from functools import wraps
 from geopy import geocoders
 from google.protobuf import text_format
 import json
@@ -13,6 +14,18 @@ dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 db = None
 curDateTime = None
 collectionPrefix = None
+
+def support_jsonp(f):
+    """Wraps JSONified output for JSONP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            content = str(callback) + '(' + str(f(*args, **kwargs)) + ')'
+            return current_app.response_class(content, mimetype='application/json')
+        else:
+            return Response(f(*args, **kwargs), mimetype='application/json')
+    return decorated_function
 
 @app.before_request
 def beforeRequest():
@@ -127,10 +140,12 @@ def vehiclePosition():
 	return feed.SerializeToString()
 
 @app.route('/api/')
+@support_jsonp
 def getApiInfo():
 	return json.dumps({'version': '1.0', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
+@support_jsonp
 def getActiveRoutes():
 	# List the routes from the checkins
 	activeRoutes = db['checkins'].find({'location': {'$exists': True}}).distinct('routeId')
@@ -140,6 +155,7 @@ def getActiveRoutes():
 	return json.dumps(list(activeRoutesWithDetails))
 
 @app.route('/api/buses/on_route/<int:routeId>/')
+@support_jsonp
 def getBusesOnRoute(routeId):
 	# Get all checkins for the route, only keep the last one for each bus
 	checkins = {}
@@ -148,6 +164,7 @@ def getBusesOnRoute(routeId):
 	return json.dumps(checkins.values(), default=dthandler)
 	
 @app.route('/api/buses/history/<int:busId>/')
+@support_jsonp
 def getBusHistory(busId):
 	# Get all checkins for a bus
 	checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
@@ -159,6 +176,7 @@ def getStopsNearIntersection(city, intersection):
 	return getStopsNear(lat, lng)
 
 @app.route('/api/stops/near/<lat>/<lng>/')
+@support_jsonp
 def getStopsNear(lat, lng):
 	stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(6)
 	stops = list(stops)
@@ -171,6 +189,7 @@ def getStopsNear(lat, lng):
 	return json.dumps(stops)
 
 @app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
+@support_jsonp
 def getNextBus(routeId, stopId):
 	scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
 	lastStop = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$lt': datetime.utcnow()}}).sort('arrival_time', pymongo.DESCENDING).limit(1)
@@ -187,6 +206,27 @@ def getNextBus(routeId, stopId):
 			except KeyError:
 				pass
 	return json.dumps(data, default=dthandler)
+
+@app.route('/api/stop_times/<int:stopId>/')
+@support_jsonp
+def getBusesAtStop(stopId):
+	scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId, 
+														   		'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
+																			 	  '$lte': datetime.utcnow() + timedelta(minutes=30) } }).sort('arrival_time'))
+	for stop in scheduledStops:
+		stop['destination'] = db['destinations_' + collectionPrefix].find_one({ 'tripId': stop['trip_id'] })['stopName']
+		stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+		checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
+		for checkin in checkins:
+			try:
+				stop['adherence'] = checkin['adherence']
+				stop['busId'] = checkin['busId']
+				break
+			except KeyError:
+				pass
+		stop.pop('_id')
+		stop.pop('all_trip_ids')
+	return json.dumps(scheduledStops, default=dthandler)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
