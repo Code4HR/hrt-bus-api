@@ -171,7 +171,6 @@ def getBusHistory(busId):
 	return json.dumps(list(checkins), default=dthandler)
 
 @app.route('/api/stops/near/intersection/<city>/<intersection>/')
-@support_jsonp
 def getStopsNearIntersection(city, intersection):
 	place, (lat, lng) = geocoders.googlev3.GoogleV3().geocode("{0}, {1}, VA".format(intersection, city), exactly_one=False)[0]
 	return getStopsNear(lat, lng)
