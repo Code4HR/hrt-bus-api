@@ -1,5 +1,5 @@
 # hrt-bus-api
-HRT Bus API converts raw, real time bus data from Hampton Roads Transit and publishes the data through an application programming interface for developers to make applications from it.
+HRT Bus API publishes real time bus data from Hampton Roads Transit through an application programming interface for developers to make apps from it.
 
 HRT Bus API consists of Python scripts and a Flask app that transform, store, and expose HRT Bus data through a RESTful API. API's don't make for good demos, so we've created an HRT Bus Finder App.
 
