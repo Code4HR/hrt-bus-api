@@ -219,8 +219,10 @@ def getBusesAtStop(stopId):
 		checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
 		for checkin in checkins:
 			try:
-				stop['adherence'] = checkin['adherence']
+				stop['busAdherence'] = checkin['adherence']
 				stop['busId'] = checkin['busId']
+				stop['busPosition'] = checkin['location']
+				stop['busCheckinTime'] = checkin['time']
 				break
 			except KeyError:
 				pass
