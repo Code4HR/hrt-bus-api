@@ -40,7 +40,7 @@ class HRTDatabase:
 		scheduledStop = self.database[collectionName].find_one({ 
 										"route_id" : checkin.routeId,
 										"stop_id": checkin.stopId,
-										"direction_id": { $not: checkin.direction },
+										"direction_id": { "$not": checkin.direction },
 										"arrival_time": { "$gte": checkin.time + timedelta(minutes=checkin.adherence - 2),
 														  "$lte": checkin.time + timedelta(minutes=checkin.adherence + 2) }})
 		if scheduledStop is None:
