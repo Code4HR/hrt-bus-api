@@ -223,6 +223,7 @@ def getBusesAtStop(stopId):
 				stop['busId'] = checkin['busId']
 				stop['busPosition'] = checkin['location']
 				stop['busCheckinTime'] = checkin['time']
+				stop['_id'] = checkin['_id']
 				break
 			except KeyError:
 				pass
