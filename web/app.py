@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-	return json.dumps({'version': '1.0', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+	return json.dumps({'version': '0.1', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -216,6 +216,7 @@ def getBusesAtStop(stopId):
 	for stop in scheduledStops:
 		stop['destination'] = db['destinations_' + collectionPrefix].find_one({ 'tripId': stop['trip_id'] })['stopName']
 		stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+		stop['_id'] = str(stop['_id'])
 		checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
 		for checkin in checkins:
 			try:
@@ -223,10 +224,10 @@ def getBusesAtStop(stopId):
 				stop['busId'] = checkin['busId']
 				stop['busPosition'] = checkin['location']
 				stop['busCheckinTime'] = checkin['time']
+				stop['_id'] = str(checkin['_id'])
 				break
 			except KeyError:
 				pass
-		stop.pop('_id')
 		stop.pop('all_trip_ids')
 	return json.dumps(scheduledStops, default=dthandler)
 
