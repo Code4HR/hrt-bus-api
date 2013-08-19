@@ -65,7 +65,7 @@ def process(text):
         checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
         stats['foundRoute'] += 1
     
-    if hasattr(checkin, 'adherence') and hasattr(checkin, 'block_id'):
+    if hasattr(checkin, 'adherence') and hasattr(checkin, 'blockId'):
         db.updateRealTimeArrival(checkin.blockId, checkin.adherence)
     
     checkinDocs.append(checkin.__dict__)
