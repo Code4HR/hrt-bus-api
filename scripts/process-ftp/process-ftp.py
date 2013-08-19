@@ -5,70 +5,70 @@ from HRTDatabase import HRTDatabase
 import config
 
 def checkinProcessed(checkin):
-	if lastCheckins is None:
-		return False
-	if checkin.time == lastCheckins["time"]:
-		return checkin.busId in lastCheckins["busIds"]
-	return checkin.time < lastCheckins["time"]
+    if lastCheckins is None:
+        return False
+    if checkin.time == lastCheckins["time"]:
+        return checkin.busId in lastCheckins["busIds"]
+    return checkin.time < lastCheckins["time"]
 
 def process(text):
-	if not text.strip():
-		return
-	
-	stats['lines'] += 1
-	
-	try:
-		checkin = Checkin(text, str(curTime.year))
-	except ValueError:
-		stats['invalid'] += 1
-		return
-			
-	if checkinProcessed(checkin):
-		return
-	
-	stats['processed'] += 1
-	
-	if hasattr(checkin, 'routeId'):
-		checkin.tripId = None
-		checkin.blockId = None
-		checkin.lastStopSequence = None
-		checkin.lastStopSequenceOBA = None
-		if hasattr(checkin, 'adherence'):
-			scheduledStop = db.getScheduledStop(checkin)
-			if scheduledStop is not None:
-				stats['foundTrip'] += 1
-				checkin.tripId = scheduledStop['trip_id']
-				checkin.blockId = scheduledStop['block_id']
-				checkin.lastStopSequence = scheduledStop['stop_sequence']
-				checkin.lastStopSequenceOBA = scheduledStop['stop_sequence_OBA']
-				checkin.scheduleMatch = True
-		if checkin.tripId is None and checkin.busId in busRouteMappings:
-			checkin.tripId = busRouteMappings[checkin.busId]['tripId']
-			checkin.blockId = busRouteMappings[checkin.busId]['blockId']
-			checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
-			checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
-		busRouteMappings[checkin.busId] = {	'busId': checkin.busId,
-											'routeId' : checkin.routeId,
-											'direction': checkin.direction, 
-											'tripId': checkin.tripId, 
-											'blockId': checkin.blockId,
-											'lastStopSequence': checkin.lastStopSequence,
-											'lastStopSequenceOBA': checkin.lastStopSequenceOBA,
-											'time': checkin.time }
-		stats['hadRoute'] += 1
-	elif checkin.busId in busRouteMappings:
-		checkin.routeId = busRouteMappings[checkin.busId]['routeId']
-		checkin.direction = busRouteMappings[checkin.busId]['direction']
-		checkin.tripId = busRouteMappings[checkin.busId]['tripId']
-		checkin.blockId = busRouteMappings[checkin.busId]['blockId']
-		checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
-		checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
-		stats['foundRoute'] += 1
-	
-	if hasattr(checkin, 'adherence') and hasattr(checkin, 'block_id'):
-	    db.updateRealTimeArrival(checkin.blockId, checkin.adherence)
-	
-	checkinDocs.append(checkin.__dict__)
+    if not text.strip():
+        return
+    
+    stats['lines'] += 1
+    
+    try:
+        checkin = Checkin(text, str(curTime.year))
+    except ValueError:
+        stats['invalid'] += 1
+        return
+            
+    if checkinProcessed(checkin):
+        return
+    
+    stats['processed'] += 1
+    
+    if hasattr(checkin, 'routeId'):
+        checkin.tripId = None
+        checkin.blockId = None
+        checkin.lastStopSequence = None
+        checkin.lastStopSequenceOBA = None
+        if hasattr(checkin, 'adherence'):
+            scheduledStop = db.getScheduledStop(checkin)
+            if scheduledStop is not None:
+                stats['foundTrip'] += 1
+                checkin.tripId = scheduledStop['trip_id']
+                checkin.blockId = scheduledStop['block_id']
+                checkin.lastStopSequence = scheduledStop['stop_sequence']
+                checkin.lastStopSequenceOBA = scheduledStop['stop_sequence_OBA']
+                checkin.scheduleMatch = True
+        if checkin.tripId is None and checkin.busId in busRouteMappings:
+            checkin.tripId = busRouteMappings[checkin.busId]['tripId']
+            checkin.blockId = busRouteMappings[checkin.busId]['blockId']
+            checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
+            checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
+        busRouteMappings[checkin.busId] = { 'busId': checkin.busId,
+                                            'routeId' : checkin.routeId,
+                                            'direction': checkin.direction, 
+                                            'tripId': checkin.tripId, 
+                                            'blockId': checkin.blockId,
+                                            'lastStopSequence': checkin.lastStopSequence,
+                                            'lastStopSequenceOBA': checkin.lastStopSequenceOBA,
+                                            'time': checkin.time }
+        stats['hadRoute'] += 1
+    elif checkin.busId in busRouteMappings:
+        checkin.routeId = busRouteMappings[checkin.busId]['routeId']
+        checkin.direction = busRouteMappings[checkin.busId]['direction']
+        checkin.tripId = busRouteMappings[checkin.busId]['tripId']
+        checkin.blockId = busRouteMappings[checkin.busId]['blockId']
+        checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
+        checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
+        stats['foundRoute'] += 1
+    
+    if hasattr(checkin, 'adherence') and hasattr(checkin, 'block_id'):
+        db.updateRealTimeArrival(checkin.blockId, checkin.adherence)
+    
+    checkinDocs.append(checkin.__dict__)
 
 c = config.load()
 db = HRTDatabase(c["db_uri"], c["db_name"])
@@ -93,4 +93,4 @@ db.updateCheckins(checkinDocs)
 print "Added {0} Checkins".format(len(checkinDocs))
 
 for key, value in stats.iteritems():
-	print "{0} {1}".format(key, value)
+    print "{0} {1}".format(key, value)
