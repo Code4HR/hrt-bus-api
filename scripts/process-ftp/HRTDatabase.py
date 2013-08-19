@@ -34,13 +34,12 @@ class HRTDatabase:
         if len(checkins) > 0:
             self.database['checkins'].insert(checkins)
     
-    def updateRealTimeArrival(self, block_id, adherence):
+    def updateRealTimeArrival(self, checkin):
         checkinLocalTime = checkin.time + timedelta(hours=-5)
         collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
-        for stoptime in self.database[collectionName].find({'block_id': block_id}):
+        for stoptime in self.database[collectionName].find({'block_id': checkin.blockId}):
             self.database[collectionName].update({ '_id': stoptime['_id'] },
-                                                 { '$set': { 'actual_arrival_time': stoptime['arrival_time'] - timedelta(minutes=adherence) } },
-                                                 { 'multi': true })
+                                                 { '$set': { 'actual_arrival_time': stoptime['arrival_time'] - timedelta(minutes=checkin.adherence) } })
     
     def getScheduledStop(self, checkin):
         checkinLocalTime = checkin.time + timedelta(hours=-5)

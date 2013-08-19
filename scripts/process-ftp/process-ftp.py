@@ -66,7 +66,7 @@ def process(text):
         stats['foundRoute'] += 1
     
     if hasattr(checkin, 'adherence') and hasattr(checkin, 'blockId'):
-        db.updateRealTimeArrival(checkin.blockId, checkin.adherence)
+        db.updateRealTimeArrival(checkin)
     
     checkinDocs.append(checkin.__dict__)
 
