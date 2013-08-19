@@ -211,8 +211,12 @@ def getNextBus(routeId, stopId):
 @support_jsonp
 def getBusesAtStop(stopId):
 	scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId, 
-														   		'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
-																			 	  '$lte': datetime.utcnow() + timedelta(minutes=30) } }).sort('arrival_time'))
+														   		'$or': [
+														   		        {'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
+																			 	           '$lte': datetime.utcnow() + timedelta(minutes=30) } },
+													                    {'actual_arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
+																			 	                  '$lte': datetime.utcnow() + timedelta(minutes=30) } }]
+														      }).sort('arrival_time'))
 	for stop in scheduledStops:
 		stop['destination'] = db['destinations_' + collectionPrefix].find_one({ 'tripId': stop['trip_id'] })['stopName']
 		stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
