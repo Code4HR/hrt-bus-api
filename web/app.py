@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-    return json.dumps({'version': '0.1', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+    return json.dumps({'version': '0.2', 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
