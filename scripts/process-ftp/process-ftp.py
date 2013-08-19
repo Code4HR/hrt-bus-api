@@ -30,6 +30,7 @@ def process(text):
 	
 	if hasattr(checkin, 'routeId'):
 		checkin.tripId = None
+		checkin.blockId = None
 		checkin.lastStopSequence = None
 		checkin.lastStopSequenceOBA = None
 		if hasattr(checkin, 'adherence'):
@@ -37,17 +38,20 @@ def process(text):
 			if scheduledStop is not None:
 				stats['foundTrip'] += 1
 				checkin.tripId = scheduledStop['trip_id']
+				checkin.blockId = scheduledStop['block_id']
 				checkin.lastStopSequence = scheduledStop['stop_sequence']
 				checkin.lastStopSequenceOBA = scheduledStop['stop_sequence_OBA']
 				checkin.scheduleMatch = True
 		if checkin.tripId is None and checkin.busId in busRouteMappings:
 			checkin.tripId = busRouteMappings[checkin.busId]['tripId']
+			checkin.blockId = busRouteMappings[checkin.busId]['blockId']
 			checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
 			checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
 		busRouteMappings[checkin.busId] = {	'busId': checkin.busId,
 											'routeId' : checkin.routeId,
 											'direction': checkin.direction, 
 											'tripId': checkin.tripId, 
+											'blockId': checkin.blockId,
 											'lastStopSequence': checkin.lastStopSequence,
 											'lastStopSequenceOBA': checkin.lastStopSequenceOBA,
 											'time': checkin.time }
@@ -56,9 +60,14 @@ def process(text):
 		checkin.routeId = busRouteMappings[checkin.busId]['routeId']
 		checkin.direction = busRouteMappings[checkin.busId]['direction']
 		checkin.tripId = busRouteMappings[checkin.busId]['tripId']
+		checkin.blockId = busRouteMappings[checkin.busId]['blockId']
 		checkin.lastStopSequence = busRouteMappings[checkin.busId]['lastStopSequence']
 		checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
 		stats['foundRoute'] += 1
+	
+	if hasattr(checkin, 'adherence') and hasattr(checkin, 'block_id'):
+	    db.updateRealTimeArrival(checkin.blockId, checkin.adherence)
+	
 	checkinDocs.append(checkin.__dict__)
 
 c = config.load()
