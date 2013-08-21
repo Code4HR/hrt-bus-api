@@ -43,9 +43,12 @@ class HRTDatabase:
         
         checkinLocalTime = checkin.time + timedelta(hours=-5)
         collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
-        for stoptime in self.database[collectionName].find({'block_id': checkin.blockId}):
+        stopTimes = self.database[collectionName].find({'block_id': checkin.blockId})
+        count = stopTimes.count()
+        for stoptime in stopTimes:
             stoptime['actual_arrival_time'] = stoptime['arrival_time'] - timedelta(minutes=checkin.adherence)
             self.database[collectionName].save(stoptime)
+        return count
     
     def getScheduledStop(self, checkin):
         checkinLocalTime = checkin.time + timedelta(hours=-5)

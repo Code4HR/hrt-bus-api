@@ -66,7 +66,7 @@ def process(text):
         stats['foundRoute'] += 1
     
     if hasattr(checkin, 'adherence') and hasattr(checkin, 'blockId'):
-        db.updateRealTimeArrival(checkin)
+        stats['arriveTimesUpdated'] += db.updateRealTimeArrival(checkin)
     
     checkinDocs.append(checkin.__dict__)
 
@@ -81,7 +81,7 @@ print "Read {0} Bus Route Mappings".format(len(busRouteMappings))
 
 lastCheckins = db.getLastCheckinSummary()
 checkinDocs = []
-stats = {'lines': 0, 'invalid': 0, 'processed': 0, 'hadRoute': 0, 'foundRoute': 0, 'foundTrip': 0}
+stats = {'lines': 0, 'invalid': 0, 'processed': 0, 'hadRoute': 0, 'foundRoute': 0, 'foundTrip': 0, 'arriveTimesUpdated': 0}
 
 ftp = FTP('216.54.15.3')
 ftp.login()
