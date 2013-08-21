@@ -43,7 +43,12 @@ class HRTDatabase:
         
         checkinLocalTime = checkin.time + timedelta(hours=-5)
         collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
-        stopTimes = self.database[collectionName].find({'block_id': checkin.blockId})
+        stopTimes = self.database[collectionName].find({'block_id': checkin.blockId,
+                                                        '$or': [
+                                                                {'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5-checkin.adherence),
+                                                                                   '$lte': datetime.utcnow() + timedelta(minutes=30-checkin.adherence) } },
+                                                                {'actual_arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
+                                                                                          '$lte': datetime.utcnow() + timedelta(minutes=30) } }]})
         count = stopTimes.count()
         for stoptime in stopTimes:
             stoptime['actual_arrival_time'] = stoptime['arrival_time'] - timedelta(minutes=checkin.adherence)
