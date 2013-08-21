@@ -65,10 +65,12 @@ def process(text):
         checkin.lastStopSequenceOBA = busRouteMappings[checkin.busId]['lastStopSequenceOBA']
         stats['foundRoute'] += 1
     
-    #if hasattr(checkin, 'adherence') and hasattr(checkin, 'blockId'):
-    #    db.updateRealTimeArrival(checkin)
+    if hasattr(checkin, 'adherence') and hasattr(checkin, 'blockId'):
+        db.updateRealTimeArrival(checkin)
     
     checkinDocs.append(checkin.__dict__)
+
+startTime = datetime.now()
 
 c = config.load()
 db = HRTDatabase(c["db_uri"], c["db_name"])
@@ -94,3 +96,5 @@ print "Added {0} Checkins".format(len(checkinDocs))
 
 for key, value in stats.iteritems():
     print "{0} {1}".format(key, value)
+
+print("Run time: " + str(datetime.now() - startTime))
