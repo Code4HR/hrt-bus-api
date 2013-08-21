@@ -35,11 +35,17 @@ class HRTDatabase:
             self.database['checkins'].insert(checkins)
     
     def updateRealTimeArrival(self, checkin):
+        #js = ("function(collection, blockId, adherence) {"
+        #            "db[collection].find({block_id: blockId}).forEach( function(stoptime){"
+        #                "stoptime.actual_arrival_time = new Date(stoptime.arrival_time.getTime() + adherence*60000);"
+        #                "db[collection].save(stoptime);"
+        #            "}); }")
+        
         checkinLocalTime = checkin.time + timedelta(hours=-5)
         collectionName = 'gtfs_' + checkinLocalTime.strftime('%Y%m%d')
         for stoptime in self.database[collectionName].find({'block_id': checkin.blockId}):
-            self.database[collectionName].update({ '_id': stoptime['_id'] },
-                                                 { '$set': { 'actual_arrival_time': stoptime['arrival_time'] - timedelta(minutes=checkin.adherence) } })
+            stoptime['actual_arrival_time'] = stoptime['arrival_time'] - timedelta(minutes=checkin.adherence)
+            self.database[collectionName].save(stoptime)
     
     def getScheduledStop(self, checkin):
         checkinLocalTime = checkin.time + timedelta(hours=-5)

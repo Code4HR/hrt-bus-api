@@ -14,7 +14,9 @@ class HRTDatabase:
 				self.database.drop_collection(collection)
 	
 	def insertGTFS(self, data, date):
-		self.insertData(self.genCollectionName('gtfs_', date), data)
+	    collectionName = self.genCollectionName('gtfs_', date)
+		self.insertData(collectionName, data)
+		self.database[collectionName].ensure_index('block_id')
 	
 	def insertStops(self, data, date):
 		collectionName = self.genCollectionName('stops_', date)
