@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-    return json.dumps({'version': '0.4', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+    return json.dumps({'version': '0.5', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -162,7 +162,24 @@ def getBusesOnRoute(routeId):
     for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
         checkins[checkin['busId']] = checkin
     return json.dumps(checkins.values(), default=dthandler)
+
+@app.route('/api/buses/routes')
+@app.route('/api/buses/routes/<path:routeIds>/')
+@support_jsonp
+def getBusesByRoute(routeIds=None):
+    match = { 'location': { '$exists': True } }
+    if routeIds is not None:
+        ids = map(int, filter(None, routeIds.split('/')))
+        match['routeId'] = {'$in': ids}
     
+    cursor = db['checkins'].find(match).sort('time')
+    checkins = {}
+    for c in cursor:
+        c['_id'] = str(c['_id'])
+        checkins[c['busId']] = c
+    
+    return json.dumps(checkins.values(), default=dthandler)
+
 @app.route('/api/buses/history/<int:busId>/')
 @support_jsonp
 def getBusHistory(busId):
