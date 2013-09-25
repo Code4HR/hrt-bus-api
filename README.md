@@ -7,7 +7,7 @@ HRT Bus API consists of Python scripts and a Flask app that transform, store, an
 [bus.codeforhamptonroads.org](http://bus.codeforhamptonroads.org)
 
 ## Problem
-HRT exposes the real time location of there buses at `ftp://216.54.15.3/Anrd/hrtrtf.txt`. Unfortunately, this file gives us less than five minutes of data and most of the entries don't have a route number associated with them. Riders lookup bus information by route number, so without it, the data isn't very useful.
+HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrtrtf.txt`. Unfortunately, this file gives us less than five minutes of data and most of the entries don't have a route number associated with them. Riders lookup bus information by route number, so without it, the data isn't very useful.
 
 ## Solution
 
