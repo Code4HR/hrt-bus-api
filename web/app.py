@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-    return json.dumps({'version': '0.5', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+    return json.dumps({'version': '0.6', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -195,14 +195,10 @@ def getStopsNearIntersection(city, intersection):
 @app.route('/api/stops/near/<lat>/<lng>/')
 @support_jsonp
 def getStopsNear(lat, lng):
-    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}, fields={'_id': False}).limit(6)
+    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}).limit(6)
     stops = list(stops)
-    
     for stop in stops:
-        inboundRoutes =  db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 1}).distinct('route_id')
-        outboundRoutes = db['gtfs_' + collectionPrefix].find({"stop_id": stop['stopId'], "direction_id": 0}).distinct('route_id')
-        stop['inboundRoutes'] =  list(db['routes_' + collectionPrefix].find({'route_id': {'$in': inboundRoutes}}, fields={'_id': False}).sort('route_id'))
-        stop['outboundRoutes'] = list(db['routes_' + collectionPrefix].find({'route_id': {'$in': outboundRoutes}}, fields={'_id': False}).sort('route_id'))
+        stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
 
 @app.route('/api/stops/id/<path:stopIds>/')
