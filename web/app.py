@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-    return json.dumps({'version': '0.6', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+    return json.dumps({'version': '0.7', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -251,6 +251,13 @@ def getBusesAtStop(stopId):
                 stop['busId'] = checkin['busId']
                 stop['busPosition'] = checkin['location']
                 stop['busCheckinTime'] = checkin['time']
+                
+                routeDetails = db['routes_' + collectionPrefix].find_one({'route_id': stop['route_id']})
+                stop['routeLongName'] = routeDetails['route_long_name']
+                stop['routeShortName'] = routeDetails['route_short_name']
+                stop['routeDescription'] = routeDetails['route_desc']
+                stop['routeType'] = routeDetails['route_type']
+                
                 break
             except KeyError:
                 pass
