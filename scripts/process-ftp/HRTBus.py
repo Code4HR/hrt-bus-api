@@ -29,4 +29,4 @@ class Checkin:
         if len(parts) == 10:
             self.routeId = int(parts[7])
             self.direction = int(parts[8]) - 1
-            self.stopId = int(parts[9])
+            self.stopId = parts[9]

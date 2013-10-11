@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-    return json.dumps({'version': '0.6', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+    return json.dumps({'version': '0.7', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -204,14 +204,14 @@ def getStopsNear(lat, lng):
 @app.route('/api/stops/id/<path:stopIds>/')
 @support_jsonp
 def getStopsById(stopIds):
-    ids = map(int, filter(None, stopIds.split('/')))
+    ids = stopIds.split('/')
     stops = db['stops_' + collectionPrefix].find({'stopId': {'$in': ids}})
     stops = list(stops)
     for stop in stops:
         stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
 
-@app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
+@app.route('/api/stop_times/<int:routeId>/<stopId>/')
 @support_jsonp
 def getNextBus(routeId, stopId):
     scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
@@ -230,7 +230,7 @@ def getNextBus(routeId, stopId):
                 pass
     return json.dumps(data, default=dthandler)
 
-@app.route('/api/stop_times/<int:stopId>/')
+@app.route('/api/stop_times/<stopId>/')
 @support_jsonp
 def getBusesAtStop(stopId):
     scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId, 
@@ -251,6 +251,13 @@ def getBusesAtStop(stopId):
                 stop['busId'] = checkin['busId']
                 stop['busPosition'] = checkin['location']
                 stop['busCheckinTime'] = checkin['time']
+                
+                routeDetails = db['routes_' + collectionPrefix].find_one({'route_id': stop['route_id']})
+                stop['routeLongName'] = routeDetails['route_long_name']
+                stop['routeShortName'] = routeDetails['route_short_name']
+                stop['routeDescription'] = routeDetails['route_desc']
+                stop['routeType'] = routeDetails['route_type']
+                
                 break
             except KeyError:
                 pass
