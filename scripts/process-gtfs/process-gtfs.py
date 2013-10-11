@@ -60,7 +60,7 @@ for row in stopTimes:
             row['route_id'] = int(trip['route_id'])
             row['direction_id'] = int(trip['direction_id'])
             row['block_id'] = trip['block_id']
-            row['stop_id'] = int(row['stop_id'])
+            row['stop_id'] = row['stop_id']
             row['stop_sequence'] = int(row['stop_sequence'])
             
             arriveTime = row['arrival_time'].split(':')
@@ -85,7 +85,7 @@ stopsReader = DictReader(zipFile.open("stops.txt"))
 for row in stopsReader:
     try:
         stops.append({
-            'stopId': int(row['stop_id']),
+            'stopId': row['stop_id'],
             'stopName': row['stop_name'],
             'location': [float(row['stop_lon']), float(row['stop_lat'])]
         })
