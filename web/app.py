@@ -244,6 +244,13 @@ def getBusesAtStop(stopId):
         stop['destination'] = db['destinations_' + collectionPrefix].find_one({ 'tripId': stop['trip_id'] })['stopName']
         stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
         stop['_id'] = str(stop['_id'])
+        
+        routeDetails = db['routes_' + collectionPrefix].find_one({'route_id': stop['route_id']})
+        stop['routeLongName'] = routeDetails['route_long_name']
+        stop['routeShortName'] = routeDetails['route_short_name']
+        stop['routeDescription'] = routeDetails['route_desc']
+        stop['routeType'] = routeDetails['route_type']
+        
         checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
         for checkin in checkins:
             try:
@@ -251,13 +258,6 @@ def getBusesAtStop(stopId):
                 stop['busId'] = checkin['busId']
                 stop['busPosition'] = checkin['location']
                 stop['busCheckinTime'] = checkin['time']
-                
-                routeDetails = db['routes_' + collectionPrefix].find_one({'route_id': stop['route_id']})
-                stop['routeLongName'] = routeDetails['route_long_name']
-                stop['routeShortName'] = routeDetails['route_short_name']
-                stop['routeDescription'] = routeDetails['route_desc']
-                stop['routeType'] = routeDetails['route_type']
-                
                 break
             except KeyError:
                 pass
