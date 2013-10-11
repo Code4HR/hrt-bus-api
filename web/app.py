@@ -204,14 +204,14 @@ def getStopsNear(lat, lng):
 @app.route('/api/stops/id/<path:stopIds>/')
 @support_jsonp
 def getStopsById(stopIds):
-    ids = map(int, filter(None, stopIds.split('/')))
+    ids = stopIds.split('/')
     stops = db['stops_' + collectionPrefix].find({'stopId': {'$in': ids}})
     stops = list(stops)
     for stop in stops:
         stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
 
-@app.route('/api/stop_times/<int:routeId>/<int:stopId>/')
+@app.route('/api/stop_times/<int:routeId>/<stopId>/')
 @support_jsonp
 def getNextBus(routeId, stopId):
     scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
@@ -230,7 +230,7 @@ def getNextBus(routeId, stopId):
                 pass
     return json.dumps(data, default=dthandler)
 
-@app.route('/api/stop_times/<int:stopId>/')
+@app.route('/api/stop_times/<stopId>/')
 @support_jsonp
 def getBusesAtStop(stopId):
     scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId, 
