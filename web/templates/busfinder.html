@@ -34,12 +34,31 @@
         <h3>HRT Bus Finder</h3>
 		<a href="/busfinder/about/" class="ui-btn-right">About</a>
     </div>
+    
+    <div id="new-app-redirect" style="padding:5px; color:white; background:red; text-shadow:none; text-align:center; line-height:20px;">
+        You will be redirected to the new HRT Bus Finder in 5 seconds.<br>
+        Please update your bookmark. Click here to stay on the old version.
+    </div>
 
     <div id="content" data-role="content"></div>
     <div id="mapcanvas" style="height: 100%; width: 100%;"></div>
 
 	<script src="/static/js/jquery-1.9.1.min.js"></script>
 	<script type="text/javascript">
+	    var timeout = setTimeout(function(){
+	        var redirect = 'http://hrtb.us/#';
+	        if(location.pathname.indexOf('/routes') != -1) {
+	            redirect += location.pathname.substring(location.pathname.indexOf('/routes'));
+	        }
+	        window.location = redirect;
+	    }, 5000);
+	    
+	    $('#new-app-redirect').click(function(){
+	        clearTimeout(timeout);
+	        $('#new-app-redirect').hide();
+	        alert('Please try the new HRT Bus Finder soon. If there is something you are missing in the new version, please contact us at c4hrva.us. The old version of the Bus Finder will be disabled in the coming weeks.');
+	    });
+	
 		$(document).on("mobileinit", function () {
 		    console.log('mobileinit')
 		    $.mobile.ajaxEnabled = false;
