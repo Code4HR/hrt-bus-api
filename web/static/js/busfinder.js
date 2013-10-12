@@ -542,7 +542,7 @@ $(function(){
 	
 	var Router = Backbone.Router.extend({
 		 routes: {
-			"": "home",
+			"": "busRoutes",
 			"about/": "about",
 			"routes/(:route/)": "busRoutes",
 			"findStop/": "findStop",
