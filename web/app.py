@@ -142,7 +142,7 @@ def vehiclePosition():
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
-    return json.dumps({'version': '0.7', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+    return json.dumps({'version': '0.8', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -195,7 +195,7 @@ def getStopsNearIntersection(city, intersection):
 @app.route('/api/stops/near/<lat>/<lng>/')
 @support_jsonp
 def getStopsNear(lat, lng):
-    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}).limit(6)
+    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}).limit(2)
     stops = list(stops)
     for stop in stops:
         stop['_id'] = str(stop['_id'])
