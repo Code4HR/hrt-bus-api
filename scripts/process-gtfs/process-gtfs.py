@@ -65,12 +65,12 @@ for row in stopTimes:
             
             arriveTime = row['arrival_time'].split(':')
             naiveArriveTime = midnight + timedelta(hours=int(arriveTime[0]), minutes=int(arriveTime[1]))
-            localArriveTime = eastern.localize(naiveArriveTime, is_dst=None)
+            localArriveTime = eastern.localize(naiveArriveTime, is_dst=False)
             row['arrival_time'] = localArriveTime.astimezone(pytz.utc)
             
             departTime = row['departure_time'].split(':')
             naiveDeptTime = midnight + timedelta(hours=int(departTime[0]), minutes=int(departTime[1]))
-            localDeptTime = eastern.localize(naiveDeptTime, is_dst=None)
+            localDeptTime = eastern.localize(naiveDeptTime, is_dst=False)
             row['departure_time'] = localDeptTime.astimezone(pytz.utc)
             
             activeStopTimes.append(row)
