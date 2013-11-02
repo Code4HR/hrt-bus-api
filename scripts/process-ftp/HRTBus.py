@@ -9,7 +9,7 @@ class Checkin:
         # bug here if the file contains checkins from both 12/31/N and 1/1/N+1
         local = pytz.timezone('US/Eastern')
         naive = datetime.strptime(parts[0] + ' ' + parts[1] + '/' + year, "%H:%M:%S %m/%d/%Y")
-        local_dt = local.localize(naive, is_dst=None)
+        local_dt = local.localize(naive, is_dst=False)
         self.time = local_dt.astimezone(pytz.utc)
         
         # bus id
