@@ -12,6 +12,8 @@ def checkinProcessed(checkin):
     return checkin.time < lastCheckins["time"]
 
 def process(text):
+    global lastRepeat
+    
     if not text.strip():
         return
     
@@ -90,7 +92,8 @@ ftp.login()
 ftp.cwd('Anrd')
 ftp.retrlines('RETR hrtrtf.txt', process)
 
-print "Latest Checkin Time From Previous Run: {0}".format(lastCheckins["time"])
+if lastCheckins is not None:
+    print "Latest Checkin Time From Previous Run: {0}".format(lastCheckins["time"])
 print "Latest Previously Processed Checkin Time From This Run: {0}".format(lastRepeat)
 
 db.setBusRouteMappings(busRouteMappings.values())
