@@ -92,7 +92,7 @@ ftp.login()
 ftp.cwd('Anrd')
 ftp.retrlines('RETR hrtrtf.txt', process)
 
-print "Latest Checkin Time From Previous Run: {0}".format(lastCheckins["time"])
+print "Latest Checkin Time From Previous Run: {0}".format(lastCheckins or lastCheckins["time"])
 print "Latest Previously Processed Checkin Time From This Run: {0}".format(lastRepeat)
 
 db.setBusRouteMappings(busRouteMappings.values())
