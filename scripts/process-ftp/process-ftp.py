@@ -24,6 +24,7 @@ def process(text):
         return
             
     if checkinProcessed(checkin):
+        lastRepeat = checkin.time
         return
     
     stats['processed'] += 1
@@ -79,6 +80,7 @@ curTime = datetime.utcnow() + timedelta(hours=-5)
 busRouteMappings = db.getBusRouteMappings()
 print "Read {0} Bus Route Mappings".format(len(busRouteMappings))
 
+lastRepeat = None
 lastCheckins = db.getLastCheckinSummary()
 checkinDocs = []
 stats = {'lines': 0, 'invalid': 0, 'processed': 0, 'hadRoute': 0, 'foundRoute': 0, 'foundTrip': 0, 'arriveTimesUpdated': 0}
@@ -87,6 +89,9 @@ ftp = FTP('216.54.15.3')
 ftp.login()
 ftp.cwd('Anrd')
 ftp.retrlines('RETR hrtrtf.txt', process)
+
+print "Latest Checkin Time From Previous Run: {0}".format(lastCheckins["time"])
+print "Latest Previously Processed Checkin Time From This Run: {0}".format(lastRepeat)
 
 db.setBusRouteMappings(busRouteMappings.values())
 print "Inserted {0} Bus Route Mappings".format(len(busRouteMappings))
