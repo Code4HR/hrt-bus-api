@@ -12,6 +12,8 @@ def checkinProcessed(checkin):
     return checkin.time < lastCheckins["time"]
 
 def process(text):
+    global lastRepeat
+    
     if not text.strip():
         return
     
