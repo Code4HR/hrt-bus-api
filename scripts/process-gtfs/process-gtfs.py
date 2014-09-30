@@ -22,8 +22,9 @@ db = HRTDatabase(c["db_uri"], c["db_name"])
 if len(sys.argv) != 2:
     db.removeOldGTFS(now)
 
-feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
-fileUrl = json.loads(urlopen(feedUrl).read())['data']['datafiles'][0]['file_url']
+#feedUrl = "http://www.gtfs-data-exchange.com/api/agency?agency=hampton-roads-transit-hrt"
+#fileUrl = json.loads(urlopen(feedUrl).read())['data']['datafiles'][0]['file_url']
+fileUrl = 'http://googletf.gohrt.com/google_transit.zip'
 zipFile = ZipFile(StringIO(urlopen(fileUrl).read()))
 
 daysFromNow = 1
