@@ -4,7 +4,7 @@ HRT Bus API publishes real time bus data from Hampton Roads Transit through an a
 HRT Bus API consists of Python scripts and a Flask app that transform, store, and expose HRT Bus data through a RESTful API. API's don't make for good demos, so we've created an HRT Bus Finder App.
 
 ## Try It
-[bus.codeforhamptonroads.org](http://bus.codeforhamptonroads.org)
+[hrtb.us](http://hrtb.us)
 
 ## Problem
 HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrtrtf.txt`. Unfortunately, this file gives us less than five minutes of data and most of the entries don't have a route number associated with them. Riders lookup bus information by route number, so without it, the data isn't very useful.
