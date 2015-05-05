@@ -21,3 +21,6 @@ venv
 .env
 
 web/debug.py
+
+# ide files
+.idea/*
