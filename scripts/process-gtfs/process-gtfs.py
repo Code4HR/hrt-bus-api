@@ -31,7 +31,13 @@ daysFromNow = 1
 if len(sys.argv) == 2:
     daysFromNow = int(sys.argv[1])
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-curDate = (now + timedelta(days=daysFromNow)).date()
+# curDate = (now + timedelta(days=daysFromNow)).date()
+"""
+WHY?????????????????????
+Maybe scheduled to run right before midnight for next day
+"""
+curDate = now.date()
+
 midnight = datetime.combine(curDate, time.min)
 curWeekDay = days[curDate.weekday()]
 print curWeekDay + " " + str(curDate)
@@ -88,7 +94,7 @@ for row in stopsReader:
         stops.append({
             'stopId': row['stop_id'],
             'stopName': row['stop_name'],
-            'location': [float(row['stop_lon']), float(row['stop_lat'])]
+            'location': [float(row['stop_lat']), float(row['stop_lon'])]
         })
     except ValueError:
         pass

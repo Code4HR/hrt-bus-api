@@ -131,8 +131,8 @@ def vehiclePosition():
         entity.vehicle.trip.trip_id = bus['trip']
         entity.vehicle.vehicle.id = str(bus['_id']['bus'])
         entity.vehicle.vehicle.label = str(bus['_id']['bus'])
-        entity.vehicle.position.longitude = float(bus['location'][0])
-        entity.vehicle.position.latitude = float(bus['location'][1])
+        entity.vehicle.position.latitude = float(bus['location'][0])
+        entity.vehicle.position.longitude = float(bus['location'][1])
         entity.vehicle.timestamp = long((bus['time'] - datetime(1970,1,1)).total_seconds())
     
     if request.args.get('debug'):
@@ -195,9 +195,15 @@ def getStopsNearIntersection(city, intersection):
 @app.route('/api/stops/near/<lat>/<lng>/')
 @support_jsonp
 def getStopsNear(lat, lng):
-    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lng), float(lat)]}}).limit(6)
+    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lat), float(lng)]}}).limit(6)
+    # stops = db['stops_' + collectionPrefix].find()
+    # print "db[stops_" +collectionPrefix + "].find()"
+    # print stops
+    # print stops.count()
     stops = list(stops)
+    # print stops
     for stop in stops:
+        # print stop
         stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
 
