@@ -196,14 +196,8 @@ def getStopsNearIntersection(city, intersection):
 @support_jsonp
 def getStopsNear(lat, lng):
     stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lat), float(lng)]}}).limit(6)
-    # stops = db['stops_' + collectionPrefix].find()
-    # print "db[stops_" +collectionPrefix + "].find()"
-    # print stops
-    # print stops.count()
     stops = list(stops)
-    # print stops
     for stop in stops:
-        # print stop
         stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
 
