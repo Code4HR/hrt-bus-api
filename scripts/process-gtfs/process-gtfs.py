@@ -88,7 +88,7 @@ for row in stopsReader:
         stops.append({
             'stopId': row['stop_id'],
             'stopName': row['stop_name'],
-            'location': [float(row['stop_lon']), float(row['stop_lat'])]
+            'location': [float(row['stop_lat']), float(row['stop_lon'])]
         })
     except ValueError:
         pass

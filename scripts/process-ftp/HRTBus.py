@@ -20,8 +20,8 @@ class Checkin:
             location = parts[3].split('/')
             lat = float(location[0][:2] + '.' + location[0][2:])
             lon = float(location[1][:3] + '.' + location[1][3:])
-            self.location = [lon, lat]
-        
+            self.location = [lat, lon]
+
         # adherence
         if parts[6] == 'V':
             self.adherence = int(parts[5])
