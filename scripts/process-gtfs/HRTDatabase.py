@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-from pymongo import Connection, GEO2D
+from pymongo import MongoClient, GEO2D
 
 class HRTDatabase:
     def __init__(self, uri, db):
-        self.client = Connection(uri)
+        self.client = MongoClient(uri)
         self.database = self.client[db]
 
     def removeOldGTFS(self, date):
