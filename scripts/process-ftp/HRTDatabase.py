@@ -1,10 +1,10 @@
 import pytz
 from datetime import datetime, timedelta
-from pymongo import Connection
+from pymongo import MongoClient
 
 class HRTDatabase:
     def __init__(self, uri, db):
-        self.client = Connection(uri)
+        self.client = MongoClient(uri)
         self.database = self.client[db]
     
     # get bus route mappings that are not more than 30 minutes old
