@@ -38,7 +38,7 @@ class HRTDatabase:
                                                                     { "_id": "$trip_id", 
                                                                       "stopId": { "$last": "$stop_id" }, 
                                                                       "sequence": { "$last": "$stop_sequence" } } } ])
-        return finalStops['result']
+        return finalStops
     
     def genCollectionName(self, prefix, date):
         return prefix + date.strftime('%Y%m%d')
@@ -46,5 +46,5 @@ class HRTDatabase:
     def insertData(self, collectionName, data):
         if len(data) > 0:
             self.database[collectionName].remove()
-            self.database[collectionName].insert(data)
+            self.database[collectionName].insert_many(data)
     
