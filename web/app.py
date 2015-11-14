@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
-from flask import Flask, Response, render_template, redirect, url_for, request, current_app
+from flask import Flask, Response, render_template, redirect, url_for, request, current_app, jsonify
 from functools import wraps
 from geopy import geocoders
 from google.protobuf import text_format
 import json
 import os
 import pymongo
+from bson import json_util
 import gtfs_realtime_pb2
+import bus_helpers
 
 app = Flask(__name__)
 dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
@@ -233,7 +235,12 @@ def getNextBus(routeId, stopId):
 @app.route('/api/stop_times/<stopId>/')
 @support_jsonp
 def getBusesAtStop(stopId):
-    scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId, 
+    return json.dumps(find_buses_at_stop(stopId), default=dthandler)
+
+
+def find_buses_at_stop(stopId):
+    print(stopId)
+    scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId,
                                                                 '$or': [
                                                                         {'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
                                                                                            '$lte': datetime.utcnow() + timedelta(minutes=30) } },
@@ -262,7 +269,32 @@ def getBusesAtStop(stopId):
             except KeyError:
                 pass
         stop.pop('all_trip_ids')
-    return json.dumps(scheduledStops, default=dthandler)
+    return scheduledStops
+
+
+@app.route('/api/v2/stops/near/<lat>/<lng>/')
+def get_stops_near(lat=None, lng=None, cap=6):
+    """
+    @lat - Lattitude Value  (36.850769)
+    @lng - Longitude Value fmt (-76.285873)
+    @cap - Cap = number of values to return
+    """
+    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lat), float(lng)]}}).limit(cap)
+    stops = list(stops)
+    for stop in stops:
+        stop['_id'] = str(stop['_id'])
+        stop['buses'] = find_buses_at_stop(stop.get('stopId'))
+
+
+    return json.dumps(stops,  default=json_util.default)
+
+@app.route('/api/v2/stops/<stopId>')
+@support_jsonp
+def get_buses_at_stop(stopId):
+    """
+    Similar to the stop-times function but for the v2 api
+    """
+    return json.dumps(find_buses_at_stop(stopId), default=dthandler)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
