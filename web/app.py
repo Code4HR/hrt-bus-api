@@ -273,6 +273,7 @@ def find_buses_at_stop(stopId):
 
 
 @app.route('/api/v2/stops/near/<lat>/<lng>/')
+@support_jsonp
 def get_stops_near(lat=None, lng=None, cap=6):
     """
     @lat - Lattitude Value  (36.850769)
