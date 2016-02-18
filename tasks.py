@@ -6,7 +6,8 @@ def acceptance():
 
 @task
 def test():
-    run("python -m unittest discover -s test/")
+    run("coverage run tests.py")
+    run("coverage report")
 
 @task
 def lint():

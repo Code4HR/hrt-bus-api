@@ -27,3 +27,6 @@ web/debug.py
 
 # swap files
 *.swp
+
+# coverage file
+.coverage
