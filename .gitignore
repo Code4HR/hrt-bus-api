@@ -24,3 +24,6 @@ web/debug.py
 
 # ide files
 .idea/*
+
+# swap files
+*.swp
