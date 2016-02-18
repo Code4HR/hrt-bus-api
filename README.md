@@ -26,6 +26,7 @@ HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrt
 ## Setup for Local Development
 
 1. Install [Python 2](http://wiki.python.org/moin/BeginnersGuide/Download)
+2. Install [pip](https://pip.pypa.io/en/stable/installing/)
 2. Install [virtualenv](https://pypi.python.org/pypi/virtualenv)
 3. Clone this repo
 4. Create a virtual environment in the top level directory of the repo
@@ -72,6 +73,16 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
     ```
     
 3. Browse to `http://0.0.0.0:5000/`
+
+### Invoke
+
+Use `inv` or `invoke` to run various tasks associated with the project.
+
+* _test_ - Runs the unit and property tests.
+* _lint_ - Runs pylint to ensure good style.
+* _acceptance_ - Runs the acceptance tests.
+* _debug_ - Runs the flask app locally.  Does the same thing as
+    `cd web && python app.py`.
 
 ## Deployment
 
