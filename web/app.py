@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Flask, Response, render_template, redirect, url_for, request, current_app, jsonify
+from flask import Flask, Response, render_template, redirect, url_for, request, current_app
 from functools import wraps
 from geopy import geocoders
 from google.protobuf import text_format
@@ -13,9 +13,11 @@ import gtfs_realtime_pb2
 app = Flask(__name__)
 dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
 
+
 db = None
 curDateTime = None
 collectionPrefix = None
+
 
 def support_jsonp(f):
     """Wraps JSONified output for JSONP"""
@@ -29,6 +31,7 @@ def support_jsonp(f):
             return Response(f(*args, **kwargs), mimetype='application/json')
     return decorated_function
 
+
 @app.before_request
 def beforeRequest():
     global db
@@ -36,17 +39,20 @@ def beforeRequest():
     global collectionPrefix
 
     db = pymongo.Connection(os.environ['MONGO_URI']).hrt
-    curDateTime  = datetime.utcnow() + timedelta(hours=-5)
+    curDateTime = datetime.utcnow() + timedelta(hours=-5)
     collectionPrefix = curDateTime.strftime('%Y%m%d')
+
 
 @app.route('/')
 def index():
     return redirect(url_for('busfinder'))
 
+
 @app.route('/busfinder/')
 @app.route('/busfinder/<path:view>/')
 def busfinder(view=None):
     return render_template('busfinder.html')
+
 
 @app.route('/gtfs/trip_update/')
 def tripUpdate():
@@ -57,7 +63,7 @@ def tripUpdate():
 
     # header
     feed.header.gtfs_realtime_version = '1.0'
-    feed.header.timestamp = long((datetime.utcnow() - datetime(1970,1,1)).total_seconds())
+    feed.header.timestamp = long((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
 
     # create an entity for each active trip id
     activeTrips = db['checkins'].aggregate([{ "$match":
@@ -92,17 +98,18 @@ def tripUpdate():
         entity.trip_update.trip.trip_id = trip['_id']['trip']
         entity.trip_update.vehicle.id = str(trip['bus'])
         entity.trip_update.vehicle.label = str(trip['bus'])
-        entity.trip_update.timestamp = long((trip['time'] - datetime(1970,1,1)).total_seconds())
+        entity.trip_update.timestamp = long((trip['time'] - datetime(1970, 1, 1)).total_seconds())
 
         # add the stop time updates
         for update in trip['timeChecks']:
             stopTime = entity.trip_update.stop_time_update.add()
             stopTime.stop_sequence = update['seq'] if not request.args.get('oba') else update['seqOBA']
-            stopTime.arrival.delay = update['adherence'] * -60 # convert minutes to seconds
+            stopTime.arrival.delay = update['adherence'] * -60  # convert minutes to seconds
 
     if request.args.get('debug'):
-        return  text_format.MessageToString(feed)
+        return text_format.MessageToString(feed)
     return feed.SerializeToString()
+
 
 @app.route('/gtfs/vehicle_position/')
 def vehiclePosition():
@@ -135,16 +142,18 @@ def vehiclePosition():
         entity.vehicle.vehicle.label = str(bus['_id']['bus'])
         entity.vehicle.position.latitude = float(bus['location'][0])
         entity.vehicle.position.longitude = float(bus['location'][1])
-        entity.vehicle.timestamp = long((bus['time'] - datetime(1970,1,1)).total_seconds())
+        entity.vehicle.timestamp = long((bus['time'] - datetime(1970, 1, 1)).total_seconds())
 
     if request.args.get('debug'):
-        return  text_format.MessageToString(feed)
+        return text_format.MessageToString(feed)
     return feed.SerializeToString()
+
 
 @app.route('/api/')
 @support_jsonp
 def getApiInfo():
     return json.dumps({'version': '0.9', 'dbHost': db.connection.host, 'curDateTime': curDateTime, 'collectionPrefix': collectionPrefix}, default=dthandler)
+
 
 @app.route('/api/routes/active/')
 @support_jsonp
@@ -156,6 +165,7 @@ def getActiveRoutes():
     activeRoutesWithDetails = db['routes_' + collectionPrefix].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
     return json.dumps(list(activeRoutesWithDetails))
 
+
 @app.route('/api/buses/on_route/<int:routeId>/')
 @support_jsonp
 def getBusesOnRoute(routeId):
@@ -165,11 +175,12 @@ def getBusesOnRoute(routeId):
         checkins[checkin['busId']] = checkin
     return json.dumps(checkins.values(), default=dthandler)
 
+
 @app.route('/api/buses/routes')
 @app.route('/api/buses/routes/<path:routeIds>/')
 @support_jsonp
 def getBusesByRoute(routeIds=None):
-    match = { 'location': { '$exists': True } }
+    match = {'location': { '$exists': True}}
     if routeIds is not None:
         ids = map(int, filter(None, routeIds.split('/')))
         match['routeId'] = {'$in': ids}
@@ -182,6 +193,7 @@ def getBusesByRoute(routeIds=None):
 
     return json.dumps(checkins.values(), default=dthandler)
 
+
 @app.route('/api/buses/history/<int:busId>/')
 @support_jsonp
 def getBusHistory(busId):
@@ -189,10 +201,12 @@ def getBusHistory(busId):
     checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
     return json.dumps(list(checkins), default=dthandler)
 
+
 @app.route('/api/stops/near/intersection/<city>/<intersection>/')
 def getStopsNearIntersection(city, intersection):
     place, (lat, lng) = geocoders.googlev3.GoogleV3().geocode("{0}, {1}, VA".format(intersection, city), exactly_one=False)[0]
     return getStopsNear(lat, lng)
+
 
 @app.route('/api/stops/near/<lat>/<lng>/')
 @support_jsonp
@@ -203,6 +217,7 @@ def getStopsNear(lat, lng):
         stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
 
+
 @app.route('/api/stops/id/<path:stopIds>/')
 @support_jsonp
 def getStopsById(stopIds):
@@ -212,6 +227,7 @@ def getStopsById(stopIds):
     for stop in stops:
         stop['_id'] = str(stop['_id'])
     return json.dumps(stops)
+
 
 @app.route('/api/stop_times/<int:routeId>/<stopId>/')
 @support_jsonp
@@ -231,6 +247,7 @@ def getNextBus(routeId, stopId):
             except KeyError:
                 pass
     return json.dumps(data, default=dthandler)
+
 
 @app.route('/api/stop_times/<stopId>/')
 @support_jsonp
@@ -286,8 +303,8 @@ def get_stops_near(lat=None, lng=None, cap=6):
         stop['_id'] = str(stop['_id'])
         stop['buses'] = find_buses_at_stop(stop.get('stopId'))
 
+    return json.dumps(stops, default=json_util.default)
 
-    return json.dumps(stops,  default=json_util.default)
 
 @app.route('/api/v2/stops/<stopId>')
 @support_jsonp
