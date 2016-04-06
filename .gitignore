@@ -27,6 +27,7 @@ web/debug.py
 
 # swap files
 *.swp
+ghostdriver.log
 
 # coverage file
 .coverage

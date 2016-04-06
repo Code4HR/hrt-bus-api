@@ -1,6 +1,10 @@
 from invoke import run, task
 
 @task
+def clean():
+    run("rm -rf **/*.pyc")
+
+@task
 def acceptance():
     run("behave")
 

@@ -56,40 +56,42 @@ def busfinder(view=None):
 
 @app.route('/gtfs/trip_update/')
 def tripUpdate():
-    # PROTOCAL BUFFER!!!  https://developers.google.com/protocol-buffers/docs/pythontutorial
+    # PROTOCAL BUFFER!!!
+    # https://developers.google.com/protocol-buffers/docs/pythontutorial
 
     # Create feed
     feed = gtfs_realtime_pb2.FeedMessage()
 
     # header
     feed.header.gtfs_realtime_version = '1.0'
-    feed.header.timestamp = long((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
+    feed.header.timestamp = long(
+        (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
 
     # create an entity for each active trip id
-    activeTrips = db['checkins'].aggregate([{ "$match":
-                                                { "tripId": { '$ne': None },
-                                                  "adherence": { '$exists': True },
-                                                  "lastStopSequence": { '$exists': True },
-                                                  "lastStopSequenceOBA": { '$exists': True } } },
-                                            { "$sort": { "time": 1 } },
-                                            { "$group":
-                                                { "_id": { "trip": "$tripId", "seq": "$lastStopSequence" },
-                                                  "time": { "$last": "$time" },
-                                                  "bus": { "$last": "$busId" },
-                                                  "adherence": { "$last": "$adherence" },
-                                                  "seqOBA": { "$last": "$lastStopSequenceOBA" } } },
-                                            { "$sort": { "_id.seq": 1 } },
-                                            { "$group":
-                                                { "_id": { "trip": "$_id.trip" },
-                                                  "time": { "$last": "$time" },
-                                                  "bus": { "$last": "$bus" },
-                                                  "timeChecks" :
-                                                    { "$push" :
-                                                        { "seq": "$_id.seq",
-                                                          "time" : "$time",
-                                                          "adherence":  "$adherence",
-                                                          "seqOBA":  "$seqOBA" } } } } ])
-    #return json.dumps(activeTrips, default=dthandler)
+    activeTrips = db['checkins'].aggregate([{"$match":
+                                             {"tripId": {'$ne': None},
+                                                 "adherence": {'$exists': True},
+                                                 "lastStopSequence": {'$exists': True},
+                                              "lastStopSequenceOBA": {'$exists': True}}},
+                                            {"$sort": {"time": 1}},
+                                            {"$group":
+                                                {"_id": {"trip": "$tripId", "seq": "$lastStopSequence"},
+                                                 "time": {"$last": "$time"},
+                                                 "bus": {"$last": "$busId"},
+                                                 "adherence": {"$last": "$adherence"},
+                                                 "seqOBA": {"$last": "$lastStopSequenceOBA"}}},
+                                            {"$sort": {"_id.seq": 1}},
+                                            {"$group":
+                                                {"_id": {"trip": "$_id.trip"},
+                                                 "time": {"$last": "$time"},
+                                                 "bus": {"$last": "$bus"},
+                                                 "timeChecks":
+                                                    {"$push":
+                                                        {"seq": "$_id.seq",
+                                                         "time": "$time",
+                                                         "adherence":  "$adherence",
+                                                         "seqOBA":  "$seqOBA"}}}}])
+    # return json.dumps(activeTrips, default=dthandler)
 
     for trip in activeTrips['result']:
         # add the trip entity
@@ -98,13 +100,16 @@ def tripUpdate():
         entity.trip_update.trip.trip_id = trip['_id']['trip']
         entity.trip_update.vehicle.id = str(trip['bus'])
         entity.trip_update.vehicle.label = str(trip['bus'])
-        entity.trip_update.timestamp = long((trip['time'] - datetime(1970, 1, 1)).total_seconds())
+        entity.trip_update.timestamp = long(
+            (trip['time'] - datetime(1970, 1, 1)).total_seconds())
 
         # add the stop time updates
         for update in trip['timeChecks']:
             stopTime = entity.trip_update.stop_time_update.add()
-            stopTime.stop_sequence = update['seq'] if not request.args.get('oba') else update['seqOBA']
-            stopTime.arrival.delay = update['adherence'] * -60  # convert minutes to seconds
+            stopTime.stop_sequence = update['seq'] if not request.args.get('oba') else update[
+                'seqOBA']
+            stopTime.arrival.delay = update[
+                'adherence'] * -60  # convert minutes to seconds
 
     if request.args.get('debug'):
         return text_format.MessageToString(feed)
@@ -113,25 +118,27 @@ def tripUpdate():
 
 @app.route('/gtfs/vehicle_position/')
 def vehiclePosition():
-    # PROTOCAL BUFFER!!!  https://developers.google.com/protocol-buffers/docs/pythontutorial
+    # PROTOCAL BUFFER!!!
+    # https://developers.google.com/protocol-buffers/docs/pythontutorial
 
     # Create feed
     feed = gtfs_realtime_pb2.FeedMessage()
 
     # header
     feed.header.gtfs_realtime_version = '1.0'
-    feed.header.timestamp = long((datetime.utcnow() - datetime(1970,1,1)).total_seconds())
+    feed.header.timestamp = long(
+        (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
 
     # create an entity for each active trip id
-    lastBusLocations = db['checkins'].aggregate([{ "$match":
-                                                        { "tripId": { '$ne': None },
-                                                          "location": { '$exists': True } } },
-                                                 { "$group":
-                                                        { "_id": { "bus": "$busId" },
-                                                          "trip": { "$last": "$tripId" },
-                                                          "time": { "$last": "$time" },
-                                                          "location": { "$last": "$location" } } } ])
-    #return json.dumps(lastLocations, default=dthandler)
+    lastBusLocations = db['checkins'].aggregate([{"$match":
+                                                  {"tripId": {'$ne': None},
+                                                   "location": {'$exists': True}}},
+                                                 {"$group":
+                                                  {"_id": {"bus": "$busId"},
+                                                   "trip": {"$last": "$tripId"},
+                                                   "time": {"$last": "$time"},
+                                                   "location": {"$last": "$location"}}}])
+    # return json.dumps(lastLocations, default=dthandler)
 
     for bus in lastBusLocations['result']:
         # add the trip entity
@@ -142,7 +149,8 @@ def vehiclePosition():
         entity.vehicle.vehicle.label = str(bus['_id']['bus'])
         entity.vehicle.position.latitude = float(bus['location'][0])
         entity.vehicle.position.longitude = float(bus['location'][1])
-        entity.vehicle.timestamp = long((bus['time'] - datetime(1970, 1, 1)).total_seconds())
+        entity.vehicle.timestamp = long(
+            (bus['time'] - datetime(1970, 1, 1)).total_seconds())
 
     if request.args.get('debug'):
         return text_format.MessageToString(feed)
@@ -159,10 +167,12 @@ def getApiInfo():
 @support_jsonp
 def getActiveRoutes():
     # List the routes from the checkins
-    activeRoutes = db['checkins'].find({'location': {'$exists': True}}).distinct('routeId')
+    activeRoutes = db['checkins'].find(
+        {'location': {'$exists': True}}).distinct('routeId')
 
     # Get details about those routes from the GTFS data
-    activeRoutesWithDetails = db['routes_' + collectionPrefix].find({'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
+    activeRoutesWithDetails = db['routes_' + collectionPrefix].find(
+        {'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
     return json.dumps(list(activeRoutesWithDetails))
 
 
@@ -171,7 +181,7 @@ def getActiveRoutes():
 def getBusesOnRoute(routeId):
     # Get all checkins for the route, only keep the last one for each bus
     checkins = {}
-    for checkin in db['checkins'].find({'routeId':routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
+    for checkin in db['checkins'].find({'routeId': routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
         checkins[checkin['busId']] = checkin
     return json.dumps(checkins.values(), default=dthandler)
 
@@ -180,7 +190,7 @@ def getBusesOnRoute(routeId):
 @app.route('/api/buses/routes/<path:routeIds>/')
 @support_jsonp
 def getBusesByRoute(routeIds=None):
-    match = {'location': { '$exists': True}}
+    match = {'location': {'$exists': True}}
     if routeIds is not None:
         ids = map(int, filter(None, routeIds.split('/')))
         match['routeId'] = {'$in': ids}
@@ -198,20 +208,23 @@ def getBusesByRoute(routeIds=None):
 @support_jsonp
 def getBusHistory(busId):
     # Get all checkins for a bus
-    checkins = db['checkins'].find({'busId':busId, 'location': {'$exists': True}}, fields={'_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
+    checkins = db['checkins'].find({'busId': busId, 'location': {'$exists': True}}, fields={
+                                   '_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
     return json.dumps(list(checkins), default=dthandler)
 
 
 @app.route('/api/stops/near/intersection/<city>/<intersection>/')
 def getStopsNearIntersection(city, intersection):
-    place, (lat, lng) = geocoders.googlev3.GoogleV3().geocode("{0}, {1}, VA".format(intersection, city), exactly_one=False)[0]
+    place, (lat, lng) = geocoders.googlev3.GoogleV3().geocode(
+        "{0}, {1}, VA".format(intersection, city), exactly_one=False)[0]
     return getStopsNear(lat, lng)
 
 
 @app.route('/api/stops/near/<lat>/<lng>/')
 @support_jsonp
 def getStopsNear(lat, lng):
-    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lat), float(lng)]}}).limit(6)
+    stops = db['stops_' + collectionPrefix].find(
+        {"location": {"$near": [float(lat), float(lng)]}}).limit(6)
     stops = list(stops)
     for stop in stops:
         stop['_id'] = str(stop['_id'])
@@ -232,13 +245,17 @@ def getStopsById(stopIds):
 @app.route('/api/stop_times/<int:routeId>/<stopId>/')
 @support_jsonp
 def getNextBus(routeId, stopId):
-    scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
-    lastStop = db['gtfs_' + collectionPrefix].find({'route_id':routeId, 'stop_id':stopId, 'arrival_time': {'$lt': datetime.utcnow()}}).sort('arrival_time', pymongo.DESCENDING).limit(1)
+    scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id': routeId, 'stop_id': stopId, 'arrival_time': {
+                                                         '$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
+    lastStop = db['gtfs_' + collectionPrefix].find({'route_id': routeId, 'stop_id': stopId, 'arrival_time': {
+                                                   '$lt': datetime.utcnow()}}).sort('arrival_time', pymongo.DESCENDING).limit(1)
     data = list(lastStop)
     data += list(scheduledStops)
     for stop in data:
-        stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
-        checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
+        stop['all_trip_ids'] = list(
+            db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+        checkins = db['checkins'].find(
+            {'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
         for checkin in checkins:
             try:
                 stop['adherence'] = checkin['adherence']
@@ -257,25 +274,29 @@ def getBusesAtStop(stopId):
 
 def find_buses_at_stop(stopId):
     print(stopId)
-    scheduledStops = list(db['gtfs_' + collectionPrefix].find({ 'stop_id': stopId,
-                                                                '$or': [
-                                                                        {'arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
-                                                                                           '$lte': datetime.utcnow() + timedelta(minutes=30) } },
-                                                                        {'actual_arrival_time': { '$gte': datetime.utcnow() + timedelta(minutes=-5),
-                                                                                                  '$lte': datetime.utcnow() + timedelta(minutes=30) } }]
-                                                              }).sort('arrival_time'))
+    scheduledStops = list(db['gtfs_' + collectionPrefix].find({'stop_id': stopId,
+                                                               '$or': [
+                                                                   {'arrival_time': {'$gte': datetime.utcnow() + timedelta(minutes=-5),
+                                                                                     '$lte': datetime.utcnow() + timedelta(minutes=30)}},
+                                                                   {'actual_arrival_time': {'$gte': datetime.utcnow() + timedelta(minutes=-5),
+                                                                                            '$lte': datetime.utcnow() + timedelta(minutes=30)}}]
+                                                               }).sort('arrival_time'))
     for stop in scheduledStops:
-        stop['destination'] = db['destinations_' + collectionPrefix].find_one({ 'tripId': stop['trip_id'] })['stopName']
-        stop['all_trip_ids'] = list(db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
+        stop['destination'] = db['destinations_' +
+                                 collectionPrefix].find_one({'tripId': stop['trip_id']})['stopName']
+        stop['all_trip_ids'] = list(
+            db['gtfs_' + collectionPrefix].find({'block_id': stop['block_id']}).distinct('trip_id'))
         stop['_id'] = str(stop['_id'])
 
-        routeDetails = db['routes_' + collectionPrefix].find_one({'route_id': stop['route_id']})
+        routeDetails = db[
+            'routes_' + collectionPrefix].find_one({'route_id': stop['route_id']})
         stop['routeLongName'] = routeDetails['route_long_name']
         stop['routeShortName'] = routeDetails['route_short_name']
         stop['routeDescription'] = routeDetails['route_desc']
         stop['routeType'] = routeDetails['route_type']
 
-        checkins = db['checkins'].find({'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
+        checkins = db['checkins'].find(
+            {'tripId': {'$in': stop['all_trip_ids']}}).sort('time', pymongo.DESCENDING)
         for checkin in checkins:
             try:
                 stop['busAdherence'] = checkin['adherence']
@@ -297,7 +318,8 @@ def get_stops_near(lat=None, lng=None, cap=6):
     @lng - Longitude Value fmt (-76.285873)
     @cap - Cap = number of values to return
     """
-    stops = db['stops_' + collectionPrefix].find({"location": {"$near": [float(lat), float(lng)]}}).limit(cap)
+    stops = db['stops_' + collectionPrefix].find(
+        {"location": {"$near": [float(lat), float(lng)]}}).limit(cap)
     stops = list(stops)
     for stop in stops:
         stop['_id'] = str(stop['_id'])
