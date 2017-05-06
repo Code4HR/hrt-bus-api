@@ -307,7 +307,72 @@ $(function(){
 			this.selectedBus.showDetails();
 		}
 	});
-	
+
+	var BusParkView = Backbone.View.extend({
+		initialize: function () {
+			_.bindAll(this);
+
+			this.polygons = [];
+
+			this.collection = new Backbone.Collection();
+			this.collection.url = '/api/bus_parks/';
+			this.collection.on('reset', this.updatePolygons);
+			this.collection.fetch();
+		},
+
+		updatePolygons: function () {
+			// remove all polygons from map
+			this.polygons.forEach(function (polygon) {
+				polygon.setMap(null);
+			});
+
+			var polygons = this.polygons = [];
+
+			// create polygons from busPark collection
+			this.collection.each(function (busPark) {
+				// build path from collection
+				var LatLng = google.maps.LatLng;
+				var path = [];
+
+				busPark.get('path').forEach(function (point) {
+					path.push(new LatLng(point[0], point[1]));
+				});
+
+				var polygon = new google.maps.Polygon({
+					map: Map,
+					fillColor: 'DarkOrchid',
+					strokeColor: 'DeepPink',
+					strokeWeight: 1,
+					paths: [path]
+				});
+
+				polygons.push(polygon);
+			});
+		},
+
+		contains: function (bus) {
+			var geometry = google.maps.geometry;
+
+			for (var i = 0; i < this.polygons.length; i += 1) {
+				if (geometry.poly.containsLocation(bus.position,
+					this.polygons[i])) {
+
+					return true;
+				}
+			}
+
+			return false;
+		},
+
+		destroy: function () {
+			this.polygons.forEach(function (polygon) {
+				polygon.setMap(null);
+			});
+
+			this.remove();
+		}
+	});
+
 	var BusView = Backbone.View.extend({
 		initialize: function() {
 			_.bindAll(this);
@@ -315,12 +380,15 @@ $(function(){
 			this.collection.url = '/api/buses/history/' + this.model.get('busId');
 			this.collection.on('reset', this.createPath, this);
 			this.collection.fetch();
-			this.createMarker();
+			this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
+
+			// don't display marker if in the bus park
+			if (!busParkView.contains(this)) {
+				this.createMarker();
+			}
 		},
 		
 		createMarker: function () {
-			this.position = new google.maps.LatLng(this.model.get('location')[1], this.model.get('location')[0]);
-
 			var icon;
 
 			if (this.model.get('direction') === 0) {
@@ -592,7 +660,9 @@ $(function(){
 			App.ContentView.setSubView(new NextBusView({ collection: stopTimes, stop: stop, route: route }));
 		}
 	});
-	
+
+	var busParkView = new BusParkView();
+
 	var App = {
 		MapView: new MapView,
 		ContentView: new ContentView,
