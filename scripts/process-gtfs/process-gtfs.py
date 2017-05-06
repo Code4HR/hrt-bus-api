@@ -27,6 +27,15 @@ if len(sys.argv) != 2:
 fileUrl = 'http://googletf.gohrt.com/google_transit.zip'
 zipFile = ZipFile(StringIO(urlopen(fileUrl).read()))
 
+def open_from_zipfile(filename):
+    # Remove UTF-8 BOM (http://stackoverflow.com/a/18664752/438281)
+    return StringIO(
+        zipFile
+        .open(filename)
+        .read()
+        .decode("utf-8-sig")
+        .encode("utf-8"))
+
 daysFromNow = 1
 if len(sys.argv) == 2:
     daysFromNow = int(sys.argv[1])
@@ -37,7 +46,7 @@ curWeekDay = days[curDate.weekday()]
 print curWeekDay + " " + str(curDate)
 
 activeServiceIds = []
-calendar = DictReader(zipFile.open("calendar.txt"))
+calendar = DictReader(open_from_zipfile("calendar.txt"))
 for row in calendar:
     start = datetime.strptime(row['start_date'], "%Y%m%d").date()
     end = datetime.strptime(row['end_date'], "%Y%m%d").date()
@@ -46,14 +55,14 @@ for row in calendar:
 print activeServiceIds
 
 activeTrips = {}
-trips = DictReader(zipFile.open("trips.txt"))
+trips = DictReader(open_from_zipfile("trips.txt"))
 for row in trips:
     if row['service_id'] in activeServiceIds:
         activeTrips[row['trip_id']] = row
 print str(len(activeTrips)) + " active trips"
 
 activeStopTimes = []
-stopTimes = DictReader(zipFile.open("stop_times.txt"))
+stopTimes = DictReader(open_from_zipfile("stop_times.txt"))
 for row in stopTimes:
     if row['trip_id'] in activeTrips:
         try:
@@ -82,7 +91,7 @@ print str(len(activeStopTimes)) + " active stop times"
 db.insertGTFS(activeStopTimes, curDate)
 
 stops = []
-stopsReader = DictReader(zipFile.open("stops.txt"))
+stopsReader = DictReader(open_from_zipfile("stops.txt"))
 for row in stopsReader:
     try:
         stops.append({
@@ -96,7 +105,7 @@ print str(len(stops)) + " stops"
 db.insertStops(stops, curDate)
 
 routes = []
-routesReader = DictReader(zipFile.open("routes.txt"))
+routesReader = DictReader(open_from_zipfile("routes.txt"))
 for row in routesReader:
     try:
         row['route_id'] = int(row['route_id'])
