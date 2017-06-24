@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = web
+
+[report]
+fail_under = 100
