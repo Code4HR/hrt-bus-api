@@ -30,9 +30,9 @@ functions:
   ftp:
     handler: ftp.process
     memorySize: 128
-    timeout: 60
+    timeout: 120
     events:
-      - schedule: rate(1 minute)
+      - schedule: rate(2 minutes)
 
 plugins:
   - serverless-python-requirements

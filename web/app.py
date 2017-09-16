@@ -172,7 +172,7 @@ def getActiveRoutes():
 
     # Get details about those routes from the GTFS data
     activeRoutesWithDetails = db['routes_' + collectionPrefix].find(
-        {'route_id': {'$in': activeRoutes}}, fields={'_id': False}).sort('route_id')
+        {'route_id': {'$in': activeRoutes}}, {'_id': 0}).sort('route_id')
     return json.dumps(list(activeRoutesWithDetails))
 
 
@@ -181,7 +181,7 @@ def getActiveRoutes():
 def getBusesOnRoute(routeId):
     # Get all checkins for the route, only keep the last one for each bus
     checkins = {}
-    for checkin in db['checkins'].find({'routeId': routeId, 'location': {'$exists': True}}, fields={'_id': False}).sort('time'):
+    for checkin in db['checkins'].find({'routeId': routeId, 'location': {'$exists': True}}, {'_id': 0}).sort('time'):
         checkins[checkin['busId']] = checkin
     return json.dumps(checkins.values(), default=dthandler)
 
@@ -208,8 +208,8 @@ def getBusesByRoute(routeIds=None):
 @support_jsonp
 def getBusHistory(busId):
     # Get all checkins for a bus
-    checkins = db['checkins'].find({'busId': busId, 'location': {'$exists': True}}, fields={
-                                   '_id': False, 'tripId': False}).sort('time', pymongo.DESCENDING)
+    checkins = db['checkins'].find({'busId': busId, 'location': {'$exists': True}}, {
+                                   '_id': 0, 'tripId': 0}).sort('time', pymongo.DESCENDING)
     return json.dumps(list(checkins), default=dthandler)
 
 
