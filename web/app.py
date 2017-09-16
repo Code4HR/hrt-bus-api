@@ -328,13 +328,15 @@ def get_stops_near(lat=None, lng=None, cap=6):
     return json.dumps(stops, default=json_util.default)
 
 
-@app.route('/api/v2/stops/<stopId>')
+@app.route('/api/v2/stops')
 @support_jsonp
-def get_buses_at_stop(stopId):
+def get_buses_at_stop():
     """
     Similar to the stop-times function but for the v2 api
     """
-    return json.dumps(find_buses_at_stop(stopId), default=dthandler)
+    # Unique Sets Please
+    stop_ids = set(request.args.get("id").split(','))
+    return json.dumps([find_buses_at_stop(stop_id) for stop_id in stop_ids], default=dthandler)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
