@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
-from pymongo import MongoClient, GEO2D
+from pymongo import MongoClient, GEO2D, UpdateOne
 
 class HRTDatabase:
     def __init__(self, uri, db):
@@ -81,7 +81,7 @@ class HRTDatabase:
         if len(checkins) > 0:
             self.database['checkins'].insert(checkins)
 
-    def updateRealTimeArrival(self, checkin):
+    def getRealTimeArrivalUpdates(self, checkin):
         checkin_local_time = checkin.time + timedelta(hours=-5)
         collection_name = 'gtfs_' + checkin_local_time.strftime('%Y%m%d')
         stop_times = self.database[collection_name].find({
@@ -96,12 +96,22 @@ class HRTDatabase:
                     '$lte': datetime.utcnow() + timedelta(minutes=30)
                 }}
             ]
-        })
-        count = stop_times.count()
+        }, {'arrival_time': 1, 'actual_arrival_time': 1})
+        updates = []
         for stoptime in stop_times:
-            stoptime['actual_arrival_time'] = stoptime['arrival_time'] - timedelta(minutes=checkin.adherence)
-            self.database[collection_name].save(stoptime)
-        return count
+            new_arrival_time = stoptime['arrival_time'] - timedelta(minutes=checkin.adherence)
+            if 'actual_arrival_time' not in stoptime or new_arrival_time != stoptime['actual_arrival_time']:
+                updates.append(UpdateOne(
+                    {'_id': stoptime['_id']},
+                    {'$set': {'actual_arrival_time': new_arrival_time}}
+                ))
+        return (collection_name, updates)
+
+    def updateRealTimeArrivals(self, updates):
+        for collection_name in updates:
+            if updates[collection_name]:
+                result = self.database[collection_name].bulk_write(updates[collection_name])
+                #print result.bulk_api_result
 
     def getScheduledStop(self, checkin):
         checkin_local_time = checkin.time + timedelta(hours=-5)

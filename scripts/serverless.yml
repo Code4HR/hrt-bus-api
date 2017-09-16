@@ -18,7 +18,7 @@ provider:
   runtime: python2.7
   environment:
     db_uri: ""
-    db_name: ""
+    db_name: "hrt"
 
 functions:
   gtfs:
@@ -30,9 +30,9 @@ functions:
   ftp:
     handler: ftp.process
     memorySize: 128
-    timeout: 120
+    timeout: 60
     events:
-      - schedule: rate(2 minutes)
+      - schedule: rate(1 minute)
 
 plugins:
   - serverless-python-requirements

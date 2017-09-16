@@ -28,6 +28,8 @@ def process(event, context):
     DATABASE.updateCheckins(PROCESSOR.checkin_docs)
     print "Added {0} Checkins".format(len(PROCESSOR.checkin_docs))
 
+    DATABASE.updateRealTimeArrivals(PROCESSOR.schedule_changes)
+
     for key, value in PROCESSOR.stats.iteritems():
         print "{0} {1}".format(key, value)
 
@@ -37,6 +39,7 @@ class Processor:
         self.bus_route_mappings = DATABASE.getBusRouteMappings()
         self.last_checkins = DATABASE.getLastCheckinSummary()
         self.checkin_docs = []
+        self.schedule_changes = {}
         self.last_repeat = None
         self.stats = {
             'lines': 0,
@@ -72,13 +75,13 @@ def processData(text):
         checkin.lastStopSequence = None
         checkin.lastStopSequenceOBA = None
         if hasattr(checkin, 'adherence'):
-            scheduledStop = DATABASE.getScheduledStop(checkin)
-            if scheduledStop is not None:
+            scheduled_stop = DATABASE.getScheduledStop(checkin)
+            if scheduled_stop is not None:
                 PROCESSOR.stats['foundTrip'] += 1
-                checkin.tripId = scheduledStop['trip_id']
-                checkin.blockId = scheduledStop['block_id']
-                checkin.lastStopSequence = scheduledStop['stop_sequence']
-                checkin.lastStopSequenceOBA = scheduledStop['stop_sequence_OBA']
+                checkin.tripId = scheduled_stop['trip_id']
+                checkin.blockId = scheduled_stop['block_id']
+                checkin.lastStopSequence = scheduled_stop['stop_sequence']
+                checkin.lastStopSequenceOBA = scheduled_stop['stop_sequence_OBA']
                 checkin.scheduleMatch = True
         if checkin.tripId is None and checkin.busId in PROCESSOR.bus_route_mappings:
             checkin.tripId = PROCESSOR.bus_route_mappings[checkin.busId]['tripId']
@@ -106,7 +109,11 @@ def processData(text):
         PROCESSOR.stats['foundRoute'] += 1
 
     if hasattr(checkin, 'adherence') and hasattr(checkin, 'blockId'):
-        PROCESSOR.stats['arriveTimesUpdated'] += DATABASE.updateRealTimeArrival(checkin)
+        collection, updates = DATABASE.getRealTimeArrivalUpdates(checkin)
+        if collection not in PROCESSOR.schedule_changes:
+            PROCESSOR.schedule_changes[collection] = []
+        PROCESSOR.schedule_changes[collection].extend(updates)
+        PROCESSOR.stats['arriveTimesUpdated'] += len(updates)
 
     PROCESSOR.checkin_docs.append(checkin.__dict__)
 
