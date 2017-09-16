@@ -13,8 +13,8 @@ HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrt
 ## Solution
 
 ### Transform and Store Data - Python Scripts
-* [Process FTP](https://github.com/c4hrva/hrt-bus-api/tree/master/scripts/process-ftp) - Fetches the HRT FTP file and stores the data in MongoDB. Also attempts to set route number when it's missing.
-* [Process GTFS](https://github.com/c4hrva/hrt-bus-api/tree/master/scripts/process-gtfs) - Fetches the HRT GTFS package and stores the scheduled stop times for a single day in MongoDB.
+* [Process GTFS](https://github.com/c4hrva/hrt-bus-api/tree/master/scripts/gtfs.py) - Fetches the HRT GTFS package and stores the scheduled stop times for a single day in MongoDB.
+* [Process FTP](https://github.com/c4hrva/hrt-bus-api/tree/master/scripts/ftp.py) - Fetches the HRT FTP file and stores the data in MongoDB. Also attempts to set route number when it's missing.
 
 ### Expose Data - Python Flask
 * Web App
@@ -76,7 +76,7 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
 ## Deployment
 
 ### Scripts
-* [Iron.io](http://www.iron.io/worker) - Each script has it's own README with instructions for deployment
+* AWS Lambda - Check this [README](https://github.com/c4hrva/hrt-bus-api/tree/master/scripts/README.md)
 
 ### Flask Web Application
 * [Heroku](http://www.heroku.com/) - Check this [wiki page](https://github.com/c4hrva/hrt-bus-api/wiki/Deploying-To-Heroku)

@@ -1,0 +1,38 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: hrt
+
+provider:
+  name: aws
+  runtime: python2.7
+  environment:
+    db_uri: ""
+    db_name: ""
+
+functions:
+  gtfs:
+    handler: gtfs.process
+    memorySize: 512
+    timeout: 120
+    events:
+      - schedule: rate(1 day)
+  ftp:
+    handler: ftp.process
+    memorySize: 128
+    timeout: 60
+    events:
+      - schedule: rate(1 minute)
+
+plugins:
+  - serverless-python-requirements
