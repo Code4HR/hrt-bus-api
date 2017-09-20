@@ -24,7 +24,7 @@ functions:
   gtfs:
     handler: gtfs.process
     memorySize: 512
-    timeout: 120
+    timeout: 240
     events:
       - schedule: rate(1 day)
   ftp:
