@@ -117,6 +117,9 @@ def process(event, context):
     print str(len(destinations)) + " destinations"
     database.insertDestinations(destinations, cur_date)
 
+    print "Generating Indexes"
+    database.generateIndicesForGTFS(cur_date)
+
 def open_from_zipfile(zip_file, filename):
     # Remove UTF-8 BOM (http://stackoverflow.com/a/18664752/438281)
     return StringIO(

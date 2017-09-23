@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
-from pymongo import MongoClient, GEO2D, UpdateOne
+from pymongo import MongoClient, GEO2D, ASCENDING, UpdateOne
 
 class HRTDatabase:
     def __init__(self, uri, db):
@@ -43,6 +43,37 @@ class HRTDatabase:
             }}
         ])
         return final_stops
+
+    def generateIndicesForGTFS(self, date):
+        collection_name = self.genCollectionName('gtfs_', date)
+        self.database[collection_name].create_index([
+            ("block_id", ASCENDING)
+        ], background=True)
+        self.database[collection_name].create_index([
+            ("block_id", ASCENDING),
+            ("arrival_time", ASCENDING)
+        ], background=True)
+        self.database[collection_name].create_index([
+            ("block_id", ASCENDING),
+            ("actual_arrival_time", ASCENDING)
+        ], background=True)
+        self.database[collection_name].create_index([
+            ("stop_id", ASCENDING),
+            ("arrival_time", ASCENDING),
+            ("actual_arrival_time", ASCENDING)
+        ], background=True)
+        self.database[collection_name].create_index([
+            ("route_id", ASCENDING),
+            ("stop_id", ASCENDING),
+            ("direction_id", ASCENDING),
+            ("arrival_time", ASCENDING)
+        ], background=True)
+        self.database[collection_name].create_index([
+            ("route_id", ASCENDING),
+            ("stop_id", ASCENDING),
+            ("direction_id", ASCENDING),
+            ("departure_time", ASCENDING)
+        ], background=True)
 
     def genCollectionName(self, prefix, date):
         return prefix + date.strftime('%Y%m%d')
