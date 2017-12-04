@@ -16,9 +16,15 @@ service: hrt
 provider:
   name: aws
   runtime: python2.7
+  role: <YOUR_LAMBDA_ROLE>
+  vpc:
+    securityGroupIds:
+      - <YOUR_SECURITY_GROUP>
+    subnetIds:
+      - <YOUR_SUBNET>
   environment:
-    db_uri: ""
-    db_name: "hrt"
+    db_uri: "mongodb://<YOUR_MONGO_URL>"
+    db_name: "<YOUR_MONGO_DB>"
 
 functions:
   gtfs:

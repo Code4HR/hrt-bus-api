@@ -25,6 +25,8 @@ The scripts can be deployed to AWS Lambda using [Serverless](https://serverless.
 
 Set environment variables in `serverless.yml`
 
+Note that HRT's FTP server only allows whitelisted IPs, so you'll need to set up a VPC. [Here is one guide on how to do that](http://techblog.financialengines.com/2016/09/26/aws-lambdas-with-a-static-outgoing-ip/).
+
 Install Serverless  
 `npm install -g serverless`
 
