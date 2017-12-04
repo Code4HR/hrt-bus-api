@@ -13,7 +13,7 @@ def process(event, context):
     PROCESSOR = Processor()
     print "Read {0} Bus Route Mappings".format(len(PROCESSOR.bus_route_mappings))
 
-    ftp = FTP('216.54.15.3')
+    ftp = FTP('52.170.192.86')
     ftp.login()
     ftp.cwd('Anrd')
     ftp.retrlines('RETR hrtrtf.txt', processData)
