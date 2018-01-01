@@ -15,6 +15,7 @@ def process(event, context):
 
     ftp = FTP('52.170.192.86')
     ftp.login()
+    print ftp.sendcmd('PASV')
     ftp.cwd('Anrd')
     ftp.retrlines('RETR hrtrtf.txt', processData)
 
@@ -35,7 +36,6 @@ def process(event, context):
 
 class Processor:
     def __init__(self):
-        self.cur_time = datetime.utcnow() + timedelta(hours=-5)
         self.bus_route_mappings = DATABASE.getBusRouteMappings()
         self.last_checkins = DATABASE.getLastCheckinSummary()
         self.checkin_docs = []
@@ -58,7 +58,7 @@ def processData(text):
     PROCESSOR.stats['lines'] += 1
 
     try:
-        checkin = Checkin(text, str(PROCESSOR.cur_time.year))
+        checkin = Checkin(text)
     except ValueError:
         PROCESSOR.stats['invalid'] += 1
         return

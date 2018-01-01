@@ -2,14 +2,29 @@ import pytz
 from datetime import datetime, timedelta
 
 class Checkin:
-    def __init__(self, data, year):
+    def __init__(self, data):
         parts = data.split(',')
 
         # checkin time
-        # bug here if the file contains checkins from both 12/31/N and 1/1/N+1
-        local = pytz.timezone('US/Eastern')
-        naive = datetime.strptime(parts[0] + ' ' + parts[1] + '/' + year, "%H:%M:%S %m/%d/%Y")
-        local_dt = local.localize(naive, is_dst=False)
+        local_tz = pytz.timezone('US/Eastern')
+
+        utc = datetime.utcnow()
+        utc = utc.replace(tzinfo=pytz.utc)
+        local = utc.astimezone(local_tz)
+
+        # handle checkins from both 12/31/N and 1/1/N+1
+        year = local.year
+        if parts[1].startswith('12/') and local.month == 1:
+            year -= 1
+        elif parts[1].startswith('1/') and local.month == 12:
+            year += 1
+
+        print local, data, year
+
+        naive = datetime.strptime('{} {}/{}'.format(
+            parts[0], parts[1], str(year)
+        ), '%H:%M:%S %m/%d/%Y')
+        local_dt = local_tz.localize(naive, is_dst=False)
         self.time = local_dt.astimezone(pytz.utc)
 
         # bus id
