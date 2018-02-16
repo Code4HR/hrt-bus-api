@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from bus import Checkin
 from database import HRTDatabase
 
-DATABASE = HRTDatabase(os.environ["db_uri"], os.environ["db_name"])
+DATABASE = HRTDatabase()
 PROCESSOR = None
 LAST_REPEAT = None
 
