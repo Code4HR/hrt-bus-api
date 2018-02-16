@@ -1,11 +1,11 @@
+import os
 import pytz
 from datetime import datetime, timedelta
 from pymongo import MongoClient, GEO2D, ASCENDING, UpdateOne
 
 class HRTDatabase:
-    def __init__(self, uri, db):
-        self.client = MongoClient(uri)
-        self.database = self.client[db]
+    def __init__(self):
+        self.database = MongoClient(os.environ['MONGODB_URI']).hrt
 
     def removeOldGTFS(self, date):
         print "Removing Old GTFS Data"

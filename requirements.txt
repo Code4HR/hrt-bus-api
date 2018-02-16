@@ -1,8 +1,7 @@
-Flask==0.9
-Jinja2==2.6
-Werkzeug==0.8.3
-geopy==1.11.0
-protobuf==2.5.0
-pymongo==3.5.1
-pytz==2013b
-wsgiref==0.1.2
+APScheduler
+Flask
+Jinja2
+geopy
+protobuf
+pymongo
+pytz

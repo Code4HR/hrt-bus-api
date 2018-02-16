@@ -17,7 +17,7 @@ def process(event, context):
     now = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(EST)
     print 'Running at ' + str(now)
 
-    database = HRTDatabase(os.environ["db_uri"], os.environ["db_name"])
+    database = HRTDatabase()
     if 'daysFromNow' not in event:
         database.removeOldGTFS(now)
 
