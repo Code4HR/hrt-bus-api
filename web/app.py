@@ -45,13 +45,7 @@ def beforeRequest():
 
 @app.route('/')
 def index():
-    return redirect(url_for('busfinder'))
-
-
-@app.route('/busfinder/')
-@app.route('/busfinder/<path:view>/')
-def busfinder(view=None):
-    return render_template('busfinder.html')
+    return redirect(url_for('getApiInfo'))
 
 
 @app.route('/gtfs/trip_update/')
