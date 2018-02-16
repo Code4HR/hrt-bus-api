@@ -5,7 +5,7 @@ from pymongo import MongoClient, GEO2D, ASCENDING, UpdateOne
 
 class HRTDatabase:
     def __init__(self):
-        self.database = MongoClient(os.environ['MONGODB_URI']).hrt
+        self.database = MongoClient(os.environ['MONGODB_URI']).get_database(None)
 
     def removeOldGTFS(self, date):
         print "Removing Old GTFS Data"
