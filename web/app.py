@@ -38,7 +38,7 @@ def beforeRequest():
     global curDateTime
     global collectionPrefix
 
-    db = pymongo.MongoClient(os.environ['MONGO_URI']).hrt
+    db = pymongo.MongoClient(os.environ['MONGODB_URI']).hrt
     curDateTime = datetime.utcnow() + timedelta(hours=-5)
     collectionPrefix = curDateTime.strftime('%Y%m%d')
 
