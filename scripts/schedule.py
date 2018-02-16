@@ -7,7 +7,7 @@ sched = BlockingScheduler()
 #def timed_job():
 #    print('This job is run every three minutes.')
 
-@sched.scheduled_job('cron', hour=14)
+@sched.scheduled_job('cron', hour=14, minute=5)
 def gtfs_job():
     print  'Running GTFS Job'
     gtfs.process({}, None)
