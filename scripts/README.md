@@ -1,9 +1,8 @@
 # Scripts
 
-Both scripts require setting the following environment variables:
+Both scripts require setting the following environment variable:
 
-* `db_uri`
-* `db_name`
+* `MONGODB_URI`
 
 ## GTFS
 
@@ -11,7 +10,7 @@ Both scripts require setting the following environment variables:
 
 Downloads GTFS data and loads one day's schedule into the database. Realtime data from HRT is relative to schedule data, so this data is necessary to correct interpret realtime data.
 
-If `daysRelativeToToday` is not specified, it defaults to `1`, which means that the schedule for the following day is loaded. To load the current day's data, run `python gtfs.py 0`.
+If `daysRelativeToToday` is not specified, it defaults to `0`, which means that the schedule for the current day is loaded.
 
 ## FTP
 
@@ -20,6 +19,10 @@ If `daysRelativeToToday` is not specified, it defaults to `1`, which means that 
 Downloads realtime data from HRT, matches to scheduled data and stores results in database.
 
 # Deployment
+
+The current deployment strategy is to use a Heroku custom clock process. Below are details for deploying to AWS Lambda, where we used to run the scripts.
+
+# AWS Deployment (OLD)
 
 The scripts can be deployed to AWS Lambda using [Serverless](https://serverless.com) where they will run periodically.
 

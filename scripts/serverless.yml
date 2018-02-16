@@ -23,8 +23,7 @@ provider:
     subnetIds:
       - <YOUR_SUBNET>
   environment:
-    db_uri: "mongodb://<YOUR_MONGO_URL>"
-    db_name: "<YOUR_MONGO_DB>"
+    MONGODB_URI: "mongodb://<YOUR_MONGO_URL>"
 
 functions:
   gtfs:

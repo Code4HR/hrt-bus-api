@@ -8,7 +8,7 @@ HRT Bus API consists of Python scripts and a Flask app that transform, store, an
 * REST Api: [api.hrtb.us/api](http://api.hrtb.us/api/)
 
 ## Problem
-HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrtrtf.txt`. Unfortunately, this file gives us less than five minutes of data and most of the entries don't have a route number associated with them. Riders lookup bus information by route number, so without it, the data isn't very useful.
+HRT exposes the real time location of their buses through a text file exposed through an FTP server. Unfortunately, this file gives us less than five minutes of data and most of the entries don't have a route number associated with them. Riders lookup bus information by route number, so without it, the data isn't very useful.
 
 ## Solution
 
@@ -19,9 +19,6 @@ HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrt
 ### Expose Data - Python Flask
 * Web App
     * [RESTful API](https://github.com/code4hr/hrt-bus-api/wiki/RESTful-API)
-    * Bus Finder
-    
-      ![Bus Finder](https://raw.github.com/bschoenfeld/hrt-bus-api/master/screenshot.png "Bus Finder")
 
 ## Setup for Local Development
 
@@ -51,18 +48,18 @@ HRT exposes the real time location of their buses at `ftp://216.54.15.3/Anrd/hrt
     ```
 
 ### Scripts
-If you would like to develop the scripts, you will need your own MongoDB instance. I recommend [MongoLab](https://mongolab.com/welcome/). If you just want to work on the web app, feel free to skip the part about the scripts. Read-only access is provided to a MongoDB instance that is being populated with real-time bus data.
+If you would like to develop the scripts, you will need your own MongoDB instance. I recommend [mLab](https://mLab.com/). If you just want to work on the web app, feel free to skip the part about the scripts. Ask someone on the team for read-only access to our production MongoDB instance.
 
 ### Web App
 
 1. Set MongoDB URI (substitue your own MongoDB instance if you have one)
 
     ```
-    $ export MONGO_URI=mongodb://hrt_web_app:cfa@ds045897.mongolab.com:45897/hrt
+    $ export MONGO_URI=mongodb://<MONGODB_URI>
     ```
     -OR-  for Windows
     ```
-    $ set MONGO_URI=mongodb://hrt_web_app:cfa@ds045897.mongolab.com:45897/hrt
+    $ set MONGO_URI=mongodb://<MONGODB_URI>
     ```
 2. Change to the web directory and run the flask app
 
@@ -75,12 +72,9 @@ If you would like to develop the scripts, you will need your own MongoDB instanc
 
 ## Deployment
 
-### Scripts
-* AWS Lambda - Check this [README](https://github.com/c4hrva/hrt-bus-api/tree/master/scripts/README.md)
-
-### Flask Web Application
-* [Heroku](http://www.heroku.com/) - Check this [wiki page](https://github.com/c4hrva/hrt-bus-api/wiki/Deploying-To-Heroku)
+We deploy to [Heroku](http://www.heroku.com/). Check this [wiki page](https://github.com/c4hrva/hrt-bus-api/wiki/Deploying-To-Heroku)
 
 ## We're Here to Help
-* Ben Schoenfeld - ben.schoenfeld@gmail.com - [@oilytheotter](http://twitter.com/oilytheotter)
-* Search or post to our [Google Group](https://groups.google.com/a/codeforamerica.org/forum/#!forum/hrva-brigade) for the local "Brigade" 
+* Ben - [@OilyTheOtter](http://twitter.com/oilytheotter)
+* Blaine - [@wbprice](https://twitter.com/wbprice)
+* Stanley - [@StanZheng](https://twitter.com/StanZheng)
