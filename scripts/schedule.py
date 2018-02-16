@@ -7,7 +7,7 @@ sched = BlockingScheduler()
 # Process FTP every minute
 @sched.scheduled_job('interval', minutes=1)
 def ftp_job():
-    print 'Running FTP Job
+    print 'Running FTP Job'
     ftp.process({}, None)
     print 'FTP Job Complete'
 
