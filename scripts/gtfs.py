@@ -131,4 +131,7 @@ def open_from_zipfile(zip_file, filename):
     )
 
 if __name__ == "__main__":
-    process({'daysFromNow': 0}, None)
+    days_from_now = 0
+    if len(sys.argv) > 1:
+        days_from_now = int(sys.argv[1])
+    process({'daysFromNow': days_from_now}, None)
