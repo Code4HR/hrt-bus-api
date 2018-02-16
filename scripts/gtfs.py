@@ -129,3 +129,6 @@ def open_from_zipfile(zip_file, filename):
         .decode("utf-8-sig")
         .encode("utf-8")
     )
+
+if __name__ == "__main__":
+    process({'daysFromNow': 0}, None)
