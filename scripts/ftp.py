@@ -15,7 +15,7 @@ def process(event, context):
 
     ftp = FTP('52.170.192.86')
     ftp.login()
-    print ftp.sendcmd('PASV')
+    #print ftp.sendcmd('PASV')
     ftp.cwd('Anrd')
     ftp.retrlines('RETR hrtrtf.txt', processData)
 

@@ -19,7 +19,7 @@ class Checkin:
         elif parts[1].startswith('1/') and local.month == 12:
             year += 1
 
-        print local, data, year
+        #print local, data, year
 
         naive = datetime.strptime('{} {}/{}'.format(
             parts[0], parts[1], str(year)
