@@ -63,13 +63,13 @@ class HRTDatabase:
             ("actual_arrival_time", ASCENDING)
         ], background=True)
         self.database[collection_name].create_index([
-            ("route_id", ASCENDING),
+            ("route_short_name", ASCENDING),
             ("stop_id", ASCENDING),
             ("direction_id", ASCENDING),
             ("arrival_time", ASCENDING)
         ], background=True)
         self.database[collection_name].create_index([
-            ("route_id", ASCENDING),
+            ("route_short_name", ASCENDING),
             ("stop_id", ASCENDING),
             ("direction_id", ASCENDING),
             ("departure_time", ASCENDING)
@@ -148,7 +148,7 @@ class HRTDatabase:
         checkin_local_time = checkin.time + timedelta(hours=-5)
         collection_name = 'gtfs_' + checkin_local_time.strftime('%Y%m%d')
         scheduled_stop = self.database[collection_name].find_one({
-            "route_id" : checkin.routeId,
+            "route_short_name" : checkin.routeShortName,
             "stop_id": checkin.stopId,
             "direction_id": {"$ne": checkin.direction},
             "$or": [

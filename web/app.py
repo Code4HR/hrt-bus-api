@@ -162,32 +162,32 @@ def getApiInfo():
 def getActiveRoutes():
     # List the routes from the checkins
     activeRoutes = db['checkins'].find(
-        {'location': {'$exists': True}}).distinct('routeId')
+        {'location': {'$exists': True}}).distinct('routeShortName')
 
     # Get details about those routes from the GTFS data
     activeRoutesWithDetails = db['routes_' + collectionPrefix].find(
-        {'route_id': {'$in': activeRoutes}}, {'_id': 0}).sort('route_id')
+        {'route_short_name': {'$in': activeRoutes}}, {'_id': 0}).sort('route_short_name')
     return json.dumps(list(activeRoutesWithDetails))
 
 
-@app.route('/api/buses/on_route/<int:routeId>/')
+@app.route('/api/buses/on_route/<int:routeShortName>/')
 @support_jsonp
-def getBusesOnRoute(routeId):
+def getBusesOnRoute(routeShortName):
     # Get all checkins for the route, only keep the last one for each bus
     checkins = {}
-    for checkin in db['checkins'].find({'routeId': routeId, 'location': {'$exists': True}}, {'_id': 0}).sort('time'):
+    for checkin in db['checkins'].find({'routeShortName': routeShortName, 'location': {'$exists': True}}, {'_id': 0}).sort('time'):
         checkins[checkin['busId']] = checkin
     return json.dumps(checkins.values(), default=dthandler)
 
 
 @app.route('/api/buses/routes')
-@app.route('/api/buses/routes/<path:routeIds>/')
+@app.route('/api/buses/routes/<path:routeShortNames>/')
 @support_jsonp
-def getBusesByRoute(routeIds=None):
+def getBusesByRoute(routeShortNames=None):
     match = {'location': {'$exists': True}}
-    if routeIds is not None:
-        ids = map(int, filter(None, routeIds.split('/')))
-        match['routeId'] = {'$in': ids}
+    if routeShortNames is not None:
+        ids = map(int, filter(None, routeShortNames.split('/')))
+        match['routeShortName'] = {'$in': ids}
 
     cursor = db['checkins'].find(match).sort('time')
     checkins = {}
@@ -236,12 +236,12 @@ def getStopsById(stopIds):
     return json.dumps(stops)
 
 
-@app.route('/api/stop_times/<int:routeId>/<stopId>/')
+@app.route('/api/stop_times/<int:routeShortName>/<stopId>/')
 @support_jsonp
-def getNextBus(routeId, stopId):
-    scheduledStops = db['gtfs_' + collectionPrefix].find({'route_id': routeId, 'stop_id': stopId, 'arrival_time': {
+def getNextBus(routeShortName, stopId):
+    scheduledStops = db['gtfs_' + collectionPrefix].find({'route_short_name': routeShortName, 'stop_id': stopId, 'arrival_time': {
                                                          '$gte': datetime.utcnow()}}).sort('arrival_time').limit(3)
-    lastStop = db['gtfs_' + collectionPrefix].find({'route_id': routeId, 'stop_id': stopId, 'arrival_time': {
+    lastStop = db['gtfs_' + collectionPrefix].find({'route_short_name': routeShortName, 'stop_id': stopId, 'arrival_time': {
                                                    '$lt': datetime.utcnow()}}).sort('arrival_time', pymongo.DESCENDING).limit(1)
     data = list(lastStop)
     data += list(scheduledStops)

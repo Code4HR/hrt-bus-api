@@ -33,6 +33,22 @@ def process(event, context):
     cur_week_day = days[cur_date.weekday()]
     print cur_week_day + " " + str(cur_date)
 
+    routes = []
+    route_map = {}
+    route_errors = 0
+    routes_reader = DictReader(open_from_zipfile(zip_file, "routes.txt"))
+    for row in routes_reader:
+        try:
+            row['route_id'] = row['route_id']
+            row['route_short_name'] = int(row['route_short_name'])
+            route_map[row['route_id']] = int(row['route_short_name'])
+            routes.append(row)
+        except ValueError:
+            route_errors += 1
+            pass
+    print str(len(routes)) + " routes (" + str(route_errors) + " errors)"
+    database.insertRoutes(routes, cur_date)
+
     active_service_ids = []
     calendar = DictReader(open_from_zipfile(zip_file, "calendar.txt"))
     for row in calendar:
@@ -50,12 +66,14 @@ def process(event, context):
     print str(len(active_trips)) + " active trips"
 
     active_stop_times = []
+    active_stop_time_errors = 0
     stop_times = DictReader(open_from_zipfile(zip_file, "stop_times.txt"))
     for row in stop_times:
         if row['trip_id'] in active_trips:
             try:
                 trip = active_trips[row['trip_id']]
-                row['route_id'] = int(trip['route_id'])
+                row['route_id'] = trip['route_id']
+                row['route_short_name'] = route_map[trip['route_id']]
                 row['direction_id'] = int(trip['direction_id'])
                 row['block_id'] = trip['block_id']
                 row['stop_id'] = row['stop_id']
@@ -77,8 +95,9 @@ def process(event, context):
 
                 active_stop_times.append(row)
             except ValueError:
+                active_stop_time_errors += 1
                 pass
-    print str(len(active_stop_times)) + " active stop times"
+    print str(len(active_stop_times)) + " active stop times (" + str(active_stop_time_errors) + " errors)"
 
     database.insertGTFS(active_stop_times, cur_date)
 
@@ -95,17 +114,6 @@ def process(event, context):
             pass
     print str(len(stops)) + " stops"
     database.insertStops(stops, cur_date)
-
-    routes = []
-    routes_reader = DictReader(open_from_zipfile(zip_file, "routes.txt"))
-    for row in routes_reader:
-        try:
-            row['route_id'] = int(row['route_id'])
-            routes.append(row)
-        except ValueError:
-            pass
-    print str(len(routes)) + " routes"
-    database.insertRoutes(routes, cur_date)
 
     print "Generating Destinations Collection"
     destinations = []

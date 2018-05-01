@@ -69,7 +69,7 @@ def processData(text):
 
     PROCESSOR.stats['processed'] += 1
 
-    if hasattr(checkin, 'routeId'):
+    if hasattr(checkin, 'routeShortName'):
         checkin.tripId = None
         checkin.blockId = None
         checkin.lastStopSequence = None
@@ -90,7 +90,7 @@ def processData(text):
             checkin.lastStopSequenceOBA = PROCESSOR.bus_route_mappings[checkin.busId]['lastStopSequenceOBA']
         PROCESSOR.bus_route_mappings[checkin.busId] = {
             'busId': checkin.busId,
-            'routeId' : checkin.routeId,
+            'routeShortName' : checkin.routeShortName,
             'direction': checkin.direction,
             'tripId': checkin.tripId,
             'blockId': checkin.blockId,
@@ -100,7 +100,7 @@ def processData(text):
         }
         PROCESSOR.stats['hadRoute'] += 1
     elif checkin.busId in PROCESSOR.bus_route_mappings:
-        checkin.routeId = PROCESSOR.bus_route_mappings[checkin.busId]['routeId']
+        checkin.routeShortName = PROCESSOR.bus_route_mappings[checkin.busId]['routeShortName']
         checkin.direction = PROCESSOR.bus_route_mappings[checkin.busId]['direction']
         checkin.tripId = PROCESSOR.bus_route_mappings[checkin.busId]['tripId']
         checkin.blockId = PROCESSOR.bus_route_mappings[checkin.busId]['blockId']

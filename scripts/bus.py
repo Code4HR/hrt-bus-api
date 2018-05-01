@@ -42,6 +42,6 @@ class Checkin:
             self.adherence = int(parts[5])
 
         if len(parts) == 10:
-            self.routeId = int(parts[7])
+            self.routeShortName = int(parts[7])
             self.direction = int(parts[8]) - 1
             self.stopId = parts[9].zfill(4)
