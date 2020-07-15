@@ -1,3 +1,6 @@
+# ARCHIVED
+HRT will begin supporting real time data and has stopped sharing their hack-y real-time feed. This project is no longer useful.
+
 # hrt-bus-api
 HRT Bus API publishes real time bus data from Hampton Roads Transit through an application programming interface for developers to make apps from it.
 
